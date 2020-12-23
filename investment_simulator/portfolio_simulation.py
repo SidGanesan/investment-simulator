@@ -14,16 +14,17 @@ __all__ = [
 
 
 def simulation_return(
-    wghts: Union[Sequence[float], np.ndarray],
+    weights: Union[Sequence[float], np.ndarray],
     asset_returns: Union[Sequence[float], np.ndarray],
 ) -> float:
-    if (type(wghts) != np.ndarray) & (type(asset_returns) != np.ndarray):
-        return np.array(wghts).dot(np.array(asset_returns))
-    else:
-        return wghts.dot(asset_returns)
+    if not isinstance(weights, np.ndarray):
+        weights = np.ndarray(weights)
+    if not isinstance(asset_returns, np.ndarray):
+        asset_returns = np.ndarray(asset_returns)
+    return weights.dot(asset_returns)
 
 
-def sim_std(
+def simulation_risk(
     weights: Union[Sequence[float], np.ndarray],
     covariance: Union[Sequence[Sequence[float]], np.ndarray],
 ) -> float:
@@ -38,6 +39,17 @@ def get_graph_vectors(result: np.ndarray) -> Tuple[Any, Any]:
     return np.average(result, axis=-1).tolist(), np.ma.std(result, axis=-1).tolist()
 
 
+def simulation_parameters(
+    asset_weightings: Union[Sequence[float], np.ndarray],
+    annual_returns: Union[Sequence[float], np.ndarray],
+    covariance: Union[Sequence[Sequence[float]], np.ndarray],
+    fee: float = 0
+) -> Tuple[float, float]:
+    portfolio_return = np.log(1 + simulation_return(asset_weightings, annual_returns) - fee)
+    portfolio_risk = simulation_risk(np.array(asset_weightings), covariance)
+    return portfolio_return, portfolio_risk
+
+
 def monte_carlo_sim(
     asset_weightings: Union[Sequence[float], np.ndarray],
     annual_returns: Union[Sequence[float], np.ndarray],
@@ -47,17 +59,17 @@ def monte_carlo_sim(
     fee: float = 0.0,
     adds: int = 0,
 ) -> SimulationResults:
-    rtrn = np.log(1 + simulation_return(asset_weightings, annual_returns) - fee)
-    std = sim_std(np.array(asset_weightings), covariance)
+    investment_return, investment_risk = simulation_parameters(asset_weightings, annual_returns, covariance, fee)
     partial_random_walk = partial(random_walk,
-                                  annual_return=rtrn,
-                                  std=std,
+                                  annual_return=investment_return,
+                                  investment_risk=investment_risk,
                                   period=steps,
-                                  step=1, contributions=adds)
+                                  step=1,
+                                  contributions=adds)
     result = np.apply_along_axis(partial_random_walk, -1, np.ones((1_000, 1)) * initial_investment)
     mean, var = get_graph_vectors(result.T)
-    return SimulationResults(portfolio_return=np.math.exp(rtrn) - 1,
-                             portfolio_risk=std,
+    return SimulationResults(portfolio_return=np.math.exp(investment_return) - 1,
+                             portfolio_risk=investment_risk,
                              simulation_mean=mean,
                              simulation_std=var,
                              x_max=steps,
@@ -66,26 +78,26 @@ def monte_carlo_sim(
 
 def investment_multiple(
     continuous_return: float,
-    std: float,
+    investment_risk: float,
     investment: float,
 ) -> float:
-    return investment * np.math.exp(random.normalvariate(continuous_return - 0.5 * std ** 2, std))
+    return investment * np.math.exp(random.normalvariate(continuous_return - 0.5 * investment_risk ** 2, investment_risk))
 
 
 def random_walk(
     simulation: np.array,
     annual_return: float,
-    std: float,
+    investment_risk: float,
     period: int,
     step: int,
     contributions: float = 0,
     contribution_growth: float = 0.0,
 ) -> Union[np.ndarray, list]:
     if step >= period:
-        return np.append(simulation, investment_multiple(annual_return, std, simulation[-1]))
+        return np.append(simulation, investment_multiple(annual_return, investment_risk, simulation[-1]))
     else:
-        return random_walk(np.append(simulation, investment_multiple(annual_return, std, simulation[-1]) + contributions * (1 + contribution_growth) ** step),
-                           annual_return, std, period, step + 1, contributions, contribution_growth)
+        return random_walk(np.append(simulation, investment_multiple(annual_return, investment_risk, simulation[-1]) + contributions * (1 + contribution_growth) ** step),
+                           annual_return, investment_risk, period, step + 1, contributions, contribution_growth)
 
 
 def matMult(a: np.ndarray, b: np.ndarray) -> np.ndarray:
