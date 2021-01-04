@@ -5,7 +5,8 @@ description = "Library for simulating a persons investment portfolio over time b
 authors = ["Siddha Ishmael Ganesan <siddha.ganesan@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "3.8"
+python = "3.8.1"
+numpy = "^1.19.4"
 
 [tool.poetry.dev-dependencies]
 
