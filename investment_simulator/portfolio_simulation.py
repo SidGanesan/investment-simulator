@@ -1,6 +1,5 @@
 from functools import partial
-from typing import Union, Tuple, Any
-from collections.abc import Sequence
+from typing import Union, Tuple, List, Sequence
 from numpy import ndarray, ones, append, matmul, apply_along_axis, array
 from numpy.ma import sqrt, exp, std, mean, log
 from numpy.random import normal
@@ -18,9 +17,9 @@ def simulation_return(
     asset_returns: Union[Sequence[float], ndarray],
 ) -> float:
     if not isinstance(weights, ndarray):
-        weights = ndarray(weights)
+        weights = array(weights)
     if not isinstance(asset_returns, ndarray):
-        asset_returns = ndarray(asset_returns)
+        asset_returns = array(asset_returns)
     return weights.dot(asset_returns)
 
 
@@ -29,9 +28,9 @@ def simulation_risk(
     covariance: Union[Sequence[Sequence[float]], ndarray],
 ) -> float:
     if not isinstance(weights, ndarray):
-        weights = ndarray(weights)
+        weights = array(weights)
     if not isinstance(covariance, ndarray):
-        covariance = ndarray(covariance)
+        covariance = array(covariance)
     return sqrt(matMult(matMult(weights, covariance), [[x] for x in weights])[0])
 
 
@@ -46,13 +45,13 @@ def matMult(
     :return: cross product of a and b
     """
     if not isinstance(a, ndarray):
-        a = ndarray(a)
+        a = array(a)
     if not isinstance(b, ndarray):
-        b = ndarray(b)
+        b = array(b)
     return matmul(a, b)
 
 
-def get_graph_vectors(result: ndarray) -> Tuple[Any, Any]:
+def get_graph_vectors(result: ndarray) -> Tuple[List[float], List[float]]:
     return mean(result, axis=-1).tolist(), std(result, axis=-1).tolist()
 
 
