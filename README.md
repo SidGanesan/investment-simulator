@@ -1,5 +1,5 @@
 # Investment-Simulator
-Library for simulating a persons investment portfolio over time based on risk and return. Focusing of modeling Stochastic methods such as Monte Carlo Simulations and implented using functional styled python. Dependancies managed using `poetry` 
+Library for simulating a persons investment portfolio over time based on risk and return. Focusing of modeling Stochastic methods such as Monte Carlo Simulations and implented using functional styled python. Dependancies managed using `poetry`
 
 # Done
 * Monte Carlo simulation for an portfolio based on asset weightings and returns

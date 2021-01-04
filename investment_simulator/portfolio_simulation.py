@@ -35,8 +35,12 @@ def simulation_risk(
 
 
 def matMult(
-    a: Union[Sequence[float], Sequence[Sequence[float]], ndarray],  # 1D list, 2D list, or ndarray
-    b: Union[Sequence[float], Sequence[Sequence[float]], ndarray],  # 1D list, 2D list, or ndarray
+    a: Union[
+        Sequence[float], Sequence[Sequence[float]], ndarray
+    ],  # 1D list, 2D list, or ndarray
+    b: Union[
+        Sequence[float], Sequence[Sequence[float]], ndarray
+    ],  # 1D list, 2D list, or ndarray
 ) -> ndarray:
     """
     Matrix multiplication
@@ -59,9 +63,11 @@ def simulation_parameters(
     asset_weightings: Union[Sequence[float], ndarray],
     annual_returns: Union[Sequence[float], ndarray],
     covariance: Union[Sequence[Sequence[float]], ndarray],
-    fee: float = 0
+    fee: float = 0,
 ) -> Tuple[float, float]:
-    portfolio_return = log(1 + simulation_return(asset_weightings, annual_returns) - fee)
+    portfolio_return = log(
+        1 + simulation_return(asset_weightings, annual_returns) - fee
+    )
     portfolio_risk = simulation_risk(array(asset_weightings), covariance)
     return portfolio_return, portfolio_risk
 
@@ -76,21 +82,29 @@ def monte_carlo_sim(
     adds: int = 0,
     simulations: int = 1_000,
 ) -> SimulationResults:
-    investment_return, investment_risk = simulation_parameters(asset_weightings, annual_returns, covariance, fee)
-    partial_random_walk = partial(random_walk,
-                                  annual_return=investment_return,
-                                  investment_risk=investment_risk,
-                                  period=steps,
-                                  step=1,
-                                  contributions=adds)
-    result = apply_along_axis(partial_random_walk, -1, ones((simulations, 1)) * initial_investment)
+    investment_return, investment_risk = simulation_parameters(
+        asset_weightings, annual_returns, covariance, fee
+    )
+    partial_random_walk = partial(
+        random_walk,
+        annual_return=investment_return,
+        investment_risk=investment_risk,
+        period=steps,
+        step=1,
+        contributions=adds,
+    )
+    result = apply_along_axis(
+        partial_random_walk, -1, ones((simulations, 1)) * initial_investment
+    )
     mean, var = get_graph_vectors(result.T)
-    return SimulationResults(portfolio_return=exp(investment_return) - 1,
-                             portfolio_risk=investment_risk,
-                             simulation_mean=mean,
-                             simulation_std=var,
-                             x_max=steps,
-                             y_max=max(mean) + max(var))
+    return SimulationResults(
+        portfolio_return=exp(investment_return) - 1,
+        portfolio_risk=investment_risk,
+        simulation_mean=mean,
+        simulation_std=var,
+        x_max=steps,
+        y_max=max(mean) + max(var),
+    )
 
 
 def investment_multiple(
@@ -98,7 +112,9 @@ def investment_multiple(
     investment_risk: float,
     investment: float,
 ) -> float:
-    return investment * exp(normal(continuous_return - 0.5 * investment_risk ** 2, investment_risk))
+    return investment * exp(
+        normal(continuous_return - 0.5 * investment_risk ** 2, investment_risk)
+    )
 
 
 def random_walk(
@@ -111,7 +127,21 @@ def random_walk(
     contribution_growth: float = 0.0,
 ) -> Union[ndarray, list]:
     if step >= period:
-        return append(simulation, investment_multiple(annual_return, investment_risk, simulation[-1]))
+        return append(
+            simulation,
+            investment_multiple(annual_return, investment_risk, simulation[-1]),
+        )
     else:
-        return random_walk(append(simulation, investment_multiple(annual_return, investment_risk, simulation[-1]) + contributions * (1 + contribution_growth) ** step),
-                           annual_return, investment_risk, period, step + 1, contributions, contribution_growth)
+        return random_walk(
+            append(
+                simulation,
+                investment_multiple(annual_return, investment_risk, simulation[-1])
+                + contributions * (1 + contribution_growth) ** step,
+            ),
+            annual_return,
+            investment_risk,
+            period,
+            step + 1,
+            contributions,
+            contribution_growth,
+        )
