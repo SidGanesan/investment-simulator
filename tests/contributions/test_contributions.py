@@ -7,7 +7,7 @@ def test_annual_growth():
 
 
 def test_continuous():
-    result = continuous_contributions(1, 100, 0.1)
+    result = continuous_contributions(100, 0.1)(1)
     assert round(result) == 110  # stupid 110.00000000000001 error
 
 

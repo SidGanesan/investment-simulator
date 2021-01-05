@@ -1,6 +1,4 @@
-from functools import partial
 from typing import Callable
-from pymonad.tools import curry
 
 
 def annual_growth(step: int, rate: float) -> float:
@@ -8,15 +6,12 @@ def annual_growth(step: int, rate: float) -> float:
 
 
 def continuous_contributions(
-    step: int, initial_contribution: float, contribution_growth: float = 0.0
-) -> float:
-    return initial_contribution * annual_growth(step, contribution_growth)
+    initial_contribution: float, contribution_growth: float = 0.0
+) -> Callable:
+    def inner(step: int) -> float:
+        return initial_contribution * annual_growth(step, contribution_growth)
 
-
-def default_contributions() -> Callable:
-    return partial(
-        continuous_contributions, initial_contribution=0, contribution_growth=0
-    )
+    return inner
 
 
 def percentage_income_contributions(

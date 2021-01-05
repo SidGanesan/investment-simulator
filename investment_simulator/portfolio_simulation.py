@@ -5,7 +5,7 @@ from numpy.ma import sqrt, exp, std, mean, log
 from numpy.random import normal
 
 from .value_objects.simulation import SimulationResults
-from .contribution_functions import default_contributions
+from .contribution_functions import continuous_contributions
 
 __all__ = [
     "monte_carlo_sim",
@@ -81,7 +81,7 @@ def monte_carlo_sim(
     initial_investment: float = 1,
     fee: float = 0.0,
     simulations: int = 1_000,
-    contribution_function: Callable = default_contributions,
+    contribution_function: Callable = continuous_contributions(0.0, 0.0),
 ) -> SimulationResults:
     investment_return, investment_risk = simulation_parameters(
         asset_weightings, annual_returns, covariance, fee
@@ -124,7 +124,7 @@ def random_walk(
     investment_risk: float,
     period: int,
     step: int,
-    contribution_function: Callable = default_contributions,
+    contribution_function: Callable = continuous_contributions(0.0, 0.0),
 ) -> Union[ndarray, list]:
     if step >= period:
         return append(
@@ -136,7 +136,7 @@ def random_walk(
             simulation=append(
                 simulation,
                 investment_multiple(annual_return, investment_risk, simulation[-1])
-                + contribution_function()(step),
+                + contribution_function(step),
             ),
             annual_return=annual_return,
             investment_risk=investment_risk,
