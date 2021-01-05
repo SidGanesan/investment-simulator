@@ -20,7 +20,7 @@ steps = 10
 result = monte_carlo_sim(asset_weights, asset_returns, covariance, steps)
 ```
 
-The result is a [Value Object(Frozen Data Class)](https://docs.python.org/3/library/dataclasses.html "Data Classes) containing the mean outcome of
+The result is a [Value Object/Frozen Data Class](https://docs.python.org/3/library/dataclasses.html "Data Classes") containing the mean outcome of
  1000 simulations over 10 years steps, as well as the calculated risk and return of the modelled portfolio.
  ```python
 SimulationResults(
@@ -51,6 +51,7 @@ def continuous_contributions(
 
 Where a function`continuous_contributions` is defined as the default contributions function. Such that there is the `initial_contribution` added to
  to a portfolio in the simulation which grows annually at a rate of `contributuion_growth` compounded by the step.
+ 
 ---
 
 ## Development
