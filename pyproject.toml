@@ -8,6 +8,7 @@ authors = ["Siddha Ishmael Ganesan <siddha.ganesan@gmail.com>"]
 python = "3.8.1"
 numpy = "^1.19.4"
 pytest = "^6.2.1"
+pymonad = "^2.3.1"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

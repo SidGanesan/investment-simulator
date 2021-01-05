@@ -2,6 +2,31 @@
 Library for simulating a persons investment portfolio over time based on risk and return. Focusing of modeling Stochastic methods such as Monte
  Carlo Simulations and implemented using functional styled python.
 
+## Usage
+### Portfolio Simulation
+Basic Usage
+```python
+from investment_simulator.portfolio_simulation import monte_carlo_sim
+
+asset_weights = [0.5, 0.5]
+asset_returns = [0.1, 0.1]
+covariance = [[1.0, 0.0], [0.0, 1.0]]
+steps = 10
+
+result = monte_carlo_sim(asset_weights, asset_returns, covariance, steps)
+```
+
+### Contribution Functions
+The simulation has the ability to add annual contributions to the portfolio uniformly across simulations. The contribution function should take the
+ timestep as an input and return a contribution amount. For example a function could be defined as:
+```python
+def continuous_contributions(step: int) -> float:
+    return 1_000 * (1.02) ** step
+```
+
+Where a function`continuous_contributions` could be defined, such that there was a `1_000` annual contribution and a growth of `0.02` for
+ inflation each year, compounded by the step.
+
 ## Development
 Dependencies managed using `poetry` and can be installed using `poetry install`
 

@@ -1,10 +1,11 @@
 from functools import partial
-from typing import Union, Tuple, List, Sequence
+from typing import Union, Tuple, List, Sequence, Callable
 from numpy import ndarray, ones, append, matmul, apply_along_axis, array
 from numpy.ma import sqrt, exp, std, mean, log
 from numpy.random import normal
 
 from .value_objects.simulation import SimulationResults
+from .contribution_functions import default_contributions
 
 __all__ = [
     "monte_carlo_sim",
@@ -79,8 +80,8 @@ def monte_carlo_sim(
     steps: int,
     initial_investment: float = 1,
     fee: float = 0.0,
-    adds: int = 0,
     simulations: int = 1_000,
+    contribution_function: Callable = default_contributions,
 ) -> SimulationResults:
     investment_return, investment_risk = simulation_parameters(
         asset_weightings, annual_returns, covariance, fee
@@ -91,7 +92,7 @@ def monte_carlo_sim(
         investment_risk=investment_risk,
         period=steps,
         step=1,
-        contributions=adds,
+        contribution_function=contribution_function,
     )
     result = apply_along_axis(
         partial_random_walk, -1, ones((simulations, 1)) * initial_investment
@@ -123,8 +124,7 @@ def random_walk(
     investment_risk: float,
     period: int,
     step: int,
-    contributions: float = 0,
-    contribution_growth: float = 0.0,
+    contribution_function: Callable = default_contributions,
 ) -> Union[ndarray, list]:
     if step >= period:
         return append(
@@ -133,15 +133,14 @@ def random_walk(
         )
     else:
         return random_walk(
-            append(
+            simulation=append(
                 simulation,
                 investment_multiple(annual_return, investment_risk, simulation[-1])
-                + contributions * (1 + contribution_growth) ** step,
+                + contribution_function()(step),
             ),
-            annual_return,
-            investment_risk,
-            period,
-            step + 1,
-            contributions,
-            contribution_growth,
+            annual_return=annual_return,
+            investment_risk=investment_risk,
+            period=period,
+            step=step + 1,
+            contribution_function=contribution_function,
         )
