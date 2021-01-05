@@ -1,7 +1,9 @@
 # Investment-Simulator
+
 Library for simulating a persons investment portfolio over time based on risk and return. This library makes use of [Markowitz/Modern Portfolio Theory
 ](https://www.investopedia.com/terms/m/modernportfoliotheory.asp "Modern Portfolio Theory") to model portfolio return and risk using the covariance
  of assets held. Focusing of modeling Stochastic methods such as Monte Carlo Simulations and implemented using functional styled python.
+
 ---
 
 ## Usage
