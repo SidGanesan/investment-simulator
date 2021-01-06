@@ -1,6 +1,6 @@
 from numpy.ma import array
 
-from investment_simulator import portfolio_simulation as ps
+from investment_simulator import portfolios as ps
 import pytest
 
 from investment_simulator.value_objects.simulation import SimulationResults

@@ -1,5 +1,5 @@
 from numpy import ones
-from investment_simulator import portfolio_simulation as ps
+from investment_simulator import portfolios as ps
 
 
 def test_graph_vectors():

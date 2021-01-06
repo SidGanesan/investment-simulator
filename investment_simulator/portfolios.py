@@ -1,11 +1,11 @@
 from functools import partial
 from typing import Union, Tuple, List, Sequence, Callable
-from numpy import ndarray, ones, append, matmul, apply_along_axis, array
-from numpy.ma import sqrt, exp, std, mean, log
-from numpy.random import normal
+from numpy import ndarray, ones, append, apply_along_axis, array
+from numpy.ma import exp, std, mean, log
 
+from .utils import simulation_return, simulation_risk, stochastic_compounding
 from .value_objects.simulation import SimulationResults
-from .contribution_functions import continuous_contributions
+from .contributions import continuous_contributions
 
 __all__ = [
     "monte_carlo_sim",
@@ -13,50 +13,12 @@ __all__ = [
 ]
 
 
-def simulation_return(
-    weights: Union[Sequence[float], ndarray],
-    asset_returns: Union[Sequence[float], ndarray],
-) -> float:
-    if not isinstance(weights, ndarray):
-        weights = array(weights)
-    if not isinstance(asset_returns, ndarray):
-        asset_returns = array(asset_returns)
-    return weights.dot(asset_returns)
-
-
-def simulation_risk(
-    weights: Union[Sequence[float], ndarray],
-    covariance: Union[Sequence[Sequence[float]], ndarray],
-) -> float:
-    if not isinstance(weights, ndarray):
-        weights = array(weights)
-    if not isinstance(covariance, ndarray):
-        covariance = array(covariance)
-    return sqrt(matMult(matMult(weights, covariance), [[x] for x in weights])[0])
-
-
-def matMult(
-    a: Union[
-        Sequence[float], Sequence[Sequence[float]], ndarray
-    ],  # 1D list, 2D list, or ndarray
-    b: Union[
-        Sequence[float], Sequence[Sequence[float]], ndarray
-    ],  # 1D list, 2D list, or ndarray
-) -> ndarray:
-    """
-    Matrix multiplication
-    :param a: vector/matrix a
-    :param b: vector/matrix b
-    :return: cross product of a and b
-    """
-    if not isinstance(a, ndarray):
-        a = array(a)
-    if not isinstance(b, ndarray):
-        b = array(b)
-    return matmul(a, b)
-
-
 def get_graph_vectors(result: ndarray) -> Tuple[List[float], List[float]]:
+    """
+    Calculates lists of the mean simulation result and standard deviation
+    :param result: Matrix of simulations
+    :return: mean outcome and standard deviation of each step in the simulation
+    """
     return mean(result, axis=-1).tolist(), std(result, axis=-1).tolist()
 
 
@@ -66,10 +28,24 @@ def simulation_parameters(
     covariance: Union[Sequence[Sequence[float]], ndarray],
     fee: float = 0,
 ) -> Tuple[float, float]:
+    """
+    Calculate the continuously compounded return and standard deviation of
+    the portfolio.
+    :param asset_weightings: Vector of portfolio allocation weights adding to 1
+    :param annual_returns: Vector of asset returns as percentages
+    :param covariance: Covariance matrix of portfolio allocations
+    :param fee: percentage based annual fee on holdings. Default 0
+    :return: Tuple of continuously compounded return and standard deviation
+    """
     portfolio_return = log(
-        1 + simulation_return(asset_weightings, annual_returns) - fee
+        1
+        + simulation_return(weights=asset_weightings, asset_returns=annual_returns)
+        - fee
     )
-    portfolio_risk = simulation_risk(array(asset_weightings), covariance)
+    portfolio_risk = simulation_risk(
+        weights=array(asset_weightings),
+        covariance=covariance,
+    )
     return portfolio_return, portfolio_risk
 
 
@@ -83,8 +59,23 @@ def monte_carlo_sim(
     simulations: int = 1_000,
     contribution_function: Callable = continuous_contributions(0.0, 0.0),
 ) -> SimulationResults:
+    """
+
+    :param asset_weightings:
+    :param annual_returns:
+    :param covariance:
+    :param steps:
+    :param initial_investment:
+    :param fee:
+    :param simulations:
+    :param contribution_function:
+    :return:
+    """
     investment_return, investment_risk = simulation_parameters(
-        asset_weightings, annual_returns, covariance, fee
+        asset_weightings=asset_weightings,
+        annual_returns=annual_returns,
+        covariance=covariance,
+        fee=fee,
     )
     partial_random_walk = partial(
         random_walk,
@@ -108,16 +99,6 @@ def monte_carlo_sim(
     )
 
 
-def investment_multiple(
-    continuous_return: float,
-    investment_risk: float,
-    investment: float,
-) -> float:
-    return investment * exp(
-        normal(continuous_return - 0.5 * investment_risk ** 2, investment_risk)
-    )
-
-
 def random_walk(
     simulation: ndarray,
     annual_return: float,
@@ -126,16 +107,34 @@ def random_walk(
     step: int,
     contribution_function: Callable = continuous_contributions(0.0, 0.0),
 ) -> Union[ndarray, list]:
+    """
+
+    :param simulation:
+    :param annual_return:
+    :param investment_risk:
+    :param period:
+    :param step:
+    :param contribution_function:
+    :return:
+    """
     if step >= period:
         return append(
             simulation,
-            investment_multiple(annual_return, investment_risk, simulation[-1]),
+            stochastic_compounding(
+                continuous_return=annual_return,
+                investment_risk=investment_risk,
+                investment=simulation[-1],
+            ),
         )
     else:
         return random_walk(
             simulation=append(
                 simulation,
-                investment_multiple(annual_return, investment_risk, simulation[-1])
+                stochastic_compounding(
+                    continuous_return=annual_return,
+                    investment_risk=investment_risk,
+                    investment=simulation[-1],
+                )
                 + contribution_function(step),
             ),
             annual_return=annual_return,

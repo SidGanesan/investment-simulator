@@ -1,4 +1,8 @@
-from investment_simulator.contribution_functions import *
+from investment_simulator.contributions import (
+    annual_growth,
+    continuous_contributions,
+    percentage_income_contributions,
+)
 
 
 def test_annual_growth():
