@@ -7,7 +7,8 @@ Library for simulating a persons investment portfolio over time based on risk an
 
 ## Usage
 ### Portfolio Simulation
-Basic Usage:
+The library offers the ability to simulate how a portfolio will grow over time in a stochastic way, show the variance of possible outcomes based on
+ asset allocations and how the assets are related to each other. Basic usage:
 ```python
 from investment_simulator.portfolios import growth_simulation
 
@@ -16,13 +17,13 @@ asset_returns = [0.1, 0.1]
 covariance = [[1.0, 0.0], [0.0, 1.0]]
 steps = 10
 
-result = growth_simulation(asset_weights, asset_returns, covariance, steps)
+growth_simulation(asset_weights, asset_returns, covariance, steps)
 ```
 
 The result is a [Value Object(Frozen Data Class)](https://docs.python.org/3/library/dataclasses.html "Data Classes) containing the mean outcome of
  1000 simulations over 10 years steps, as well as the calculated risk and return of the modelled portfolio.
  ```python
-SimulationResults(
+PortfolioResults(
     portfolio_return=0.10000000000000009,
     portfolio_risk=0.7071067811865476,
     simulation_mean=[1.0, 1.080889920462147, 1.1770098655116579, 1.372350014835664, 1.7036261053980901,
@@ -55,6 +56,32 @@ Where a function`continuous_contributions` is defined as the default contributio
 
 ---
 
+### Allocations Optimisation
+The library also offers the ability to optimise the allocations of a portfolio, determining the weightings of assets that provide the highest
+ return for the lowest risk.
+```python
+from investment_simulator.allocations import allocations_simulation
+
+annual_returns = [0.1, 0.1]
+covariance = [[0.001, 0.000], [0.000, 0.001]]
+simulations = 10
+
+allocations_simulation(annual_returns, covariance, simulations)
+```
+
+The result is a [Value Object(Frozen Data Class)](https://docs.python.org/3/library/dataclasses.html "Data Classes) containing the portfolio with
+ the highest sharpe ratio score.
+```python
+AllocationResults(
+    sharpe_ratio=4.020794467140073,
+    annual_return=0.10000000000000009,
+    risk=0.022383636053900476,
+    weights=array([0.52266234, 0.47733766])
+)
+```
+
+---
+
 ## Development
 Dependencies managed using `poetry` and can be installed using `poetry install`
 
@@ -66,7 +93,7 @@ This repository uses git hooks for; formatting using black, debug checks, and ru
 ### Tests
 Testing is done in `pytest` and can be initiated using:
 ```shell script
-poetry run python -m pytest
+poetry run python -m pytest -v
 ```
 
 ---
