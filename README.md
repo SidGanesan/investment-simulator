@@ -9,14 +9,14 @@ Library for simulating a persons investment portfolio over time based on risk an
 ### Portfolio Simulation
 Basic Usage:
 ```python
-from investment_simulator.portfolios import monte_carlo_sim
+from investment_simulator.portfolios import growth_simulation
 
 asset_weights = [0.5, 0.5]
 asset_returns = [0.1, 0.1]
 covariance = [[1.0, 0.0], [0.0, 1.0]]
 steps = 10
 
-result = monte_carlo_sim(asset_weights, asset_returns, covariance, steps)
+result = growth_simulation(asset_weights, asset_returns, covariance, steps)
 ```
 
 The result is a [Value Object(Frozen Data Class)](https://docs.python.org/3/library/dataclasses.html "Data Classes) containing the mean outcome of

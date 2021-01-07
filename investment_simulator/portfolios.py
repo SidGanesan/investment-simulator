@@ -1,15 +1,15 @@
 from functools import partial
 from typing import Union, Tuple, List, Sequence, Callable
 
-from numpy import ndarray, ones, append, apply_along_axis, array
-from numpy.ma import exp, std, mean, log
+from numpy import ndarray, ones, append, apply_along_axis
+from numpy.ma import exp, std, mean
 
 from .contributions import continuous_contributions
-from .utils import simulation_return, simulation_risk, stochastic_compounding
-from .value_objects.simulation import SimulationResults
+from .utils import stochastic_compounding, simulation_parameters
+from .value_objects.simulation import PortfolioResults
 
 __all__ = [
-    "monte_carlo_sim",
+    "growth_simulation",
     "random_walk",
 ]
 
@@ -23,34 +23,7 @@ def get_graph_vectors(result: ndarray) -> Tuple[List[float], List[float]]:
     return mean(result, axis=-1).tolist(), std(result, axis=-1).tolist()
 
 
-def simulation_parameters(
-    asset_weightings: Union[Sequence[float], ndarray],
-    annual_returns: Union[Sequence[float], ndarray],
-    covariance: Union[Sequence[Sequence[float]], ndarray],
-    fee: float = 0,
-) -> Tuple[float, float]:
-    """
-    Calculate the continuously compounded return and standard deviation of
-    the portfolio.
-    :param asset_weightings: Vector of portfolio allocation weights adding to 1
-    :param annual_returns: Vector of asset returns as percentages
-    :param covariance: Covariance matrix of portfolio allocations
-    :param fee: percentage based annual fee on holdings. Default 0
-    :return: Tuple of continuously compounded return and standard deviation
-    """
-    portfolio_return = log(
-        1
-        + simulation_return(weights=asset_weightings, asset_returns=annual_returns)
-        - fee
-    )
-    portfolio_risk = simulation_risk(
-        weights=array(asset_weightings),
-        covariance=covariance,
-    )
-    return portfolio_return, portfolio_risk
-
-
-def monte_carlo_sim(
+def growth_simulation(
     asset_weightings: Union[Sequence[float], ndarray],
     annual_returns: Union[Sequence[float], ndarray],
     covariance: Union[Sequence[Sequence[float]], ndarray],
@@ -59,7 +32,7 @@ def monte_carlo_sim(
     fee: float = 0.0,
     simulations: int = 1_000,
     contribution_function: Callable = continuous_contributions(0.0, 0.0),
-) -> SimulationResults:
+) -> PortfolioResults:
     """
     Calculates a Monte Carlo Simulation of a given Portfolio and asset metrics
     to model the potential growth of the portfolio over time.
@@ -92,7 +65,7 @@ def monte_carlo_sim(
         partial_random_walk, -1, ones((simulations, 1)) * initial_investment
     )
     mean, var = get_graph_vectors(result.T)
-    return SimulationResults(
+    return PortfolioResults(
         portfolio_return=exp(investment_return) - 1,
         portfolio_risk=investment_risk,
         simulation_mean=mean,

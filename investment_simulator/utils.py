@@ -1,7 +1,34 @@
-from typing import Union, Sequence
+from typing import Union, Sequence, Tuple
 from numpy import ndarray, array, matmul
-from numpy.ma import sqrt, exp
+from numpy.ma import sqrt, exp, log
 from numpy.random import normal
+
+
+def simulation_parameters(
+    asset_weightings: Union[Sequence[float], ndarray],
+    annual_returns: Union[Sequence[float], ndarray],
+    covariance: Union[Sequence[Sequence[float]], ndarray],
+    fee: float = 0,
+) -> Tuple[float, float]:
+    """
+    Calculate the continuously compounded return and standard deviation of
+    the portfolio.
+    :param asset_weightings: Vector of portfolio allocation weights adding to 1
+    :param annual_returns: Vector of asset returns as percentages
+    :param covariance: Covariance matrix of portfolio allocations
+    :param fee: percentage based annual fee on holdings. Default 0
+    :return: Tuple of continuously compounded return and standard deviation
+    """
+    portfolio_return = log(
+        1
+        + simulation_return(weights=asset_weightings, asset_returns=annual_returns)
+        - fee
+    )
+    portfolio_risk = simulation_risk(
+        weights=array(asset_weightings),
+        covariance=covariance,
+    )
+    return portfolio_return, portfolio_risk
 
 
 def simulation_return(
