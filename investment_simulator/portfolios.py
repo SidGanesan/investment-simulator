@@ -1,11 +1,12 @@
 from functools import partial
 from typing import Union, Tuple, List, Sequence, Callable
+
 from numpy import ndarray, ones, append, apply_along_axis, array
 from numpy.ma import exp, std, mean, log
 
+from .contributions import continuous_contributions
 from .utils import simulation_return, simulation_risk, stochastic_compounding
 from .value_objects.simulation import SimulationResults
-from .contributions import continuous_contributions
 
 __all__ = [
     "monte_carlo_sim",
@@ -60,16 +61,18 @@ def monte_carlo_sim(
     contribution_function: Callable = continuous_contributions(0.0, 0.0),
 ) -> SimulationResults:
     """
-
-    :param asset_weightings:
-    :param annual_returns:
-    :param covariance:
-    :param steps:
-    :param initial_investment:
-    :param fee:
-    :param simulations:
-    :param contribution_function:
-    :return:
+    Calculates a Monte Carlo Simulation of a given Portfolio and asset metrics
+    to model the potential growth of the portfolio over time.
+    :param asset_weightings: Vector of portfolio allocation weights adding to 1
+    :param annual_returns: Vector of asset returns as percentages
+    :param covariance: Covariance matrix of portfolio allocations
+    :param steps: Number of years to simulate
+    :param initial_investment: Initial value of the portfolio
+    :param fee: percentage based annual fee on holdings. Default 0
+    :param simulations: Number of simulations run
+    :param contribution_function: Function that gives additional contributions
+    to the portfolio at regular intervals
+    :return: SimulationResult Object that wraps key statistics of the simulation
     """
     investment_return, investment_risk = simulation_parameters(
         asset_weightings=asset_weightings,
@@ -108,14 +111,15 @@ def random_walk(
     contribution_function: Callable = continuous_contributions(0.0, 0.0),
 ) -> Union[ndarray, list]:
     """
-
-    :param simulation:
-    :param annual_return:
-    :param investment_risk:
-    :param period:
-    :param step:
-    :param contribution_function:
-    :return:
+    Recursive implementation of a Gaussian Random Walk to model a portfolio
+    :param simulation: Previous steps in the simulation
+    :param annual_return: Annual return of the portfolio being modeled
+    :param investment_risk: Standard deviation of the portfolio being modeled
+    :param period: current step of the random walk
+    :param step: total steps in the random walk
+    :param contribution_function: Function that gives additional contributions
+    to the portfolio at regular intervals
+    :return: Single simulation of a random walk
     """
     if step >= period:
         return append(

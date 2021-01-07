@@ -1,14 +1,12 @@
 from typing import Callable
 
-from investment_simulator.tax import income_tax, nz_tax_brackets
-
 
 def annual_growth(step: int, rate: float) -> float:
     """
     Calculates the rate of compounding for the number of years input
-    :param step:
-    :param rate:
-    :return:
+    :param step: Number of periods to compound
+    :param rate: Growth rate
+    :return: Compounding multiple
     """
     return (1 + rate) ** step
 
@@ -17,10 +15,10 @@ def continuous_contributions(
     initial_contribution: float, contribution_growth: float = 0.0
 ) -> Callable:
     """
-
-    :param initial_contribution:
-    :param contribution_growth:
-    :return:
+    Creates a function that returns a contribution, compounded by the input growth at each step
+    :param initial_contribution: Initial amount to be contributed
+    :param contribution_growth: Rate at which the contribution grows each step
+    :return: function that returns the contribution give a step
     """
 
     def inner(step: int) -> float:
@@ -36,12 +34,14 @@ def percentage_income_contributions(
     tax_function: Callable = (lambda x: 0),
 ) -> Callable:
     """
-
-    :param income:
-    :param contribution_rate:
-    :param income_growth:
-    :param tax_function:
-    :return:
+    Creates a function that returns a contribution based on a percentage of input income, compounded
+    by the input growth at each step. The contribution is calculated as a percentage of after tax
+    income. The tax system is provided as a function itself
+    :param income: Total Income
+    :param contribution_rate: Percentage of income to be contributed
+    :param income_growth: Rate at with income increases each step
+    :param tax_function: Function which returns the amount of tax required based on income
+    :return: Function that takes a step and returns the contribution
     """
 
     def inner(step: int) -> float:
@@ -59,12 +59,14 @@ def kiwi_saver_contributions(
     gov_contributions: float = 521.43,
 ) -> Callable:
     """
-
-    :param income:
-    :param contribution_rate:
-    :param employer_rate:
-    :param income_growth:
-    :param gov_contributions:
+    Creates a function that returns a contribution based on a percentage of input income, compounded
+    by the input growth at each step. The contribution is calculated as a percentage of before tax following
+    the New Zealand KiwiSaver retirement savings scheme.
+    :param income: Total Income
+    :param contribution_rate: Percentage of income to be contributed
+    :param employer_rate: Percentage of income matched by employer
+    :param income_growth: Rate at with income increases each step
+    :param gov_contributions: Constant government contribution
     :return:
     """
 

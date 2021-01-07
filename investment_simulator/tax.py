@@ -5,23 +5,19 @@ from typing import List, Dict, Callable, Optional
 
 def cumulative_tax(income: float) -> Callable:
     """
-
-    :param income:
-    :return:
+    Function that gives the amount of tax due based on the bracket
+    :param income: Total Income
+    :return: Function that returns tax given bracket
     """
 
     def inner(bracket: Dict[str, Optional[float]]) -> float:
-        """
-
-        :param bracket:
-        :return:
-        """
         if bracket["max"] is None:  # must handle maximum bracket case first
             return max((income - bracket["min"]) * bracket["rate"], 0)
-        if income <= bracket["max"]:  # income
-            return max((income - bracket["min"]) * bracket["rate"], 0)
-        else:
-            return bracket["sum"]
+        return (
+            max((income - bracket["min"]) * bracket["rate"], 0)
+            if income <= bracket["max"]
+            else bracket["sum"]
+        )
 
     return inner
 
@@ -46,15 +42,10 @@ def income_tax(tax_brackets: List[Dict[str, Optional[float]]]) -> Callable:
     """
     Calculates the amount of income tax to be deducted
     :param tax_brackets: list of brackets
-    :return:
+    :return: function that returns tax due given income
     """
 
     def inner(income: float) -> float:
-        """
-
-        :param income:
-        :return:
-        """
         cumulative_brackets = tuple(map(accumulated_brackets, tax_brackets))
         return reduce(
             o.add,
