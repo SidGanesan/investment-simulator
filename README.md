@@ -1,4 +1,5 @@
 # Investment-Simulator
+
 Library for simulating a persons investment portfolio over time based on risk and return. This library makes use of [Markowitz/Modern Portfolio Theory
 ](https://www.investopedia.com/terms/m/modernportfoliotheory.asp "Modern Portfolio Theory") to model portfolio return and risk using the covariance
  of assets held. Focusing of modeling Stochastic methods such as Monte Carlo Simulations and implemented using functional styled python.
@@ -20,7 +21,7 @@ steps = 10
 growth_simulation(asset_weights, asset_returns, covariance, steps)
 ```
 
-The result is a [Value Object(Frozen Data Class)](https://docs.python.org/3/library/dataclasses.html "Data Classes) containing the mean outcome of
+The result is a [Value Object/Frozen Data Class](https://docs.python.org/3/library/dataclasses.html "Data Classes") containing the mean outcome of
  1000 simulations over 10 years steps, as well as the calculated risk and return of the modelled portfolio.
  ```python
 PortfolioResults(
