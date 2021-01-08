@@ -6,15 +6,19 @@ repos:
     - id: end-of-file-fixer
     - id: trailing-whitespace
     - id: debug-statements
--   repo: https://github.com/ambv/black
-    rev: 20.8b1
-    hooks:
+- repo: https://github.com/ambv/black
+  rev: 20.8b1
+  hooks:
     - id: black
+#- repo: https://gitlab.com/pycqa/flake8
+#  rev: 3.7.9
+#  hooks:
+#    - id: flake8
 - repo: local
   hooks:
     - id: pytest-check
       name: pytest-check
-      entry: poetry run python -m pytest tests
+      entry: poetry run python -m pytest tests -v
       language: system
       pass_filenames: false
       always_run: true
