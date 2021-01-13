@@ -31,7 +31,7 @@ def percentage_income_contributions(
     income: float,
     contribution_rate: float,
     income_growth: float = 0.0,
-    tax_function: Callable = (lambda x: 0),
+    tax_function: Callable[[float], float] = (lambda x: 0),
 ) -> Callable:
     """
     Creates a function that returns a contribution based on a percentage of input income, compounded

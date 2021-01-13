@@ -1,10 +1,20 @@
-from typing import Union, Sequence, Tuple, Callable
-from numpy import ndarray, ones
-from numpy.ma import exp
-from numpy.random import dirichlet
+from dataclasses import dataclass
 
-from investment_simulator.utils import simulation_parameters
-from investment_simulator.value_objects.simulation import AllocationResults
+import numpy as np
+from typing import Tuple, Callable, List
+
+from investment_simulator.utils import simulation_parameters, ArrayLike, ArrayLike2D
+
+
+@dataclass(frozen=True)
+class AllocationResults:
+    sharpe_ratio: float
+    annual_return: float
+    risk: float
+    weights: List[float]
+
+    def __lt__(self, other: 'AllocationResults'):
+        return self.sharpe_ratio < other.sharpe_ratio
 
 
 def sharpe_calc(rtrn: float, risk: float) -> float:
@@ -18,9 +28,9 @@ def sharpe_calc(rtrn: float, risk: float) -> float:
 
 
 def simulate_allocation(
-    annual_returns: Union[Sequence[float], ndarray],
-    covariance: Union[Sequence[Sequence[float]], ndarray],
-) -> Callable:
+    annual_returns: ArrayLike,
+    covariance: ArrayLike2D,
+) -> Callable[[ArrayLike], AllocationResults]:
     """
     Function that calculates a series of statistics about a simulated portfolio.
     :param annual_returns: Vector of annual returns of assets being optimized for.
@@ -28,22 +38,25 @@ def simulate_allocation(
     :return: Sharpe Ratio, Weightings, Annual Return, Risk
     """
 
-    def inner(
-        weights: Union[Sequence[float], ndarray]
-    ) -> Tuple[float, ndarray, float, float]:
+    def inner(weights: ArrayLike) -> AllocationResults:
         rtrn, risk = simulation_parameters(
             asset_weightings=weights,
             annual_returns=annual_returns,
             covariance=covariance,
         )
-        return sharpe_calc(exp(rtrn) - 1, risk), weights, exp(rtrn) - 1, risk
+        return AllocationResults(
+            sharpe_calc(np.exp(rtrn) - 1, risk),
+            np.exp(rtrn) - 1,
+            risk,
+            weights if not isinstance(weights, np.ndarray) else weights.tolist(),
+        )
 
     return inner
 
 
 def allocations_simulation(
-    annual_returns: Union[Sequence[float], ndarray],
-    covariance: Union[Sequence[Sequence[float]], ndarray],
+    annual_returns: ArrayLike,
+    covariance: ArrayLike2D,
     simulations: int = 1_000,
 ) -> AllocationResults:
     """
@@ -54,9 +67,5 @@ def allocations_simulation(
     :param simulations: Number of simulations run.
     :return: AllocationResults Value Object.
     """
-    portfolios = dirichlet(ones(len(annual_returns)), simulations)
-    result = max(map(simulate_allocation(annual_returns, covariance), portfolios))
-    zipped_result = dict(
-        zip(("sharpe_ratio", "weights", "annual_return", "risk"), result)
-    )
-    return AllocationResults(**zipped_result)
+    portfolios = np.random.dirichlet(np.ones(len(annual_returns)), simulations)
+    return max(map(simulate_allocation(annual_returns, covariance), portfolios))

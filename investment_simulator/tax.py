@@ -1,6 +1,6 @@
 import operator as o
 from functools import reduce
-from typing import List, Dict, Callable, Optional
+from typing import List, Dict, Callable
 
 
 def cumulative_tax(income: float) -> Callable:
@@ -10,9 +10,7 @@ def cumulative_tax(income: float) -> Callable:
     :return: Function that returns tax given bracket
     """
 
-    def inner(bracket: Dict[str, Optional[float]]) -> float:
-        if bracket["max"] is None:  # must handle maximum bracket case first
-            return max((income - bracket["min"]) * bracket["rate"], 0)
+    def inner(bracket: Dict[str, float]) -> float:
         return (
             max((income - bracket["min"]) * bracket["rate"], 0)
             if income <= bracket["max"]
@@ -22,23 +20,18 @@ def cumulative_tax(income: float) -> Callable:
     return inner
 
 
-def accumulated_brackets(
-    bracket: Dict[str, Optional[float]]
-) -> Dict[str, Optional[float]]:
+def accumulated_brackets(bracket: Dict[str, float]) -> Dict[str, float]:
     """
     Adds the cumulative tax paid for a bracket if the income where to
     exceed the maximum point of the tax bracket
     :param bracket: Tax Bracket with min, max, and rate
     :return: new tax bracket with cumulative tax added
     """
-    if bracket["max"] is not None:
-        bracket["sum"] = (bracket["max"] - bracket["min"]) * bracket["rate"]
-    else:
-        bracket["sum"] = 0
+    bracket["sum"] = (bracket["max"] - bracket["min"]) * bracket["rate"]
     return bracket
 
 
-def income_tax(tax_brackets: List[Dict[str, Optional[float]]]) -> Callable:
+def income_tax(tax_brackets: List[Dict[str, float]]) -> Callable:
     """
     Calculates the amount of income tax to be deducted
     :param tax_brackets: list of brackets
@@ -56,7 +49,7 @@ def income_tax(tax_brackets: List[Dict[str, Optional[float]]]) -> Callable:
     return inner
 
 
-def nz_tax_brackets() -> List[Dict[str, Optional[float]]]:
+def nz_tax_brackets() -> List[Dict[str, float]]:
     """
     :return: NZ Tax Brackets for April 1st 2021
     """
@@ -82,7 +75,7 @@ def nz_tax_brackets() -> List[Dict[str, Optional[float]]]:
             "rate": 0.33,
         },
         {
-            "max": None,
+            "max": float("inf"),
             "min": 180_000,
             "rate": 0.39,
         },

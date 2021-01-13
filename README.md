@@ -33,8 +33,6 @@ PortfolioResults(
     simulation_std=[0.0, 0.8151713183859045, 1.407052616672628, 3.0336270877135734, 4.8721084117880755,
                     4.915923260576842, 6.394237270341292, 13.456266947236522, 24.550547468886933,
                     29.54050507961563, 42.62272966366064],
-    x_max=10,
-    y_max=46.834285107876774
 )
 ```
 
@@ -45,7 +43,7 @@ The simulation has the ability to add annual contributions to the portfolio unif
 def continuous_contributions(
     initial_contribution: float,
     contribution_growth: float = 0.0
-) -> Callable:
+) -> Callable[[int], float]:
     def inner(step: int) -> float:
         return initial_contribution *  (1 +contribution_growth) ** step
 
@@ -70,14 +68,14 @@ simulations = 10
 allocations_simulation(annual_returns, covariance, simulations)
 ```
 
-The result is a [Value Object(Frozen Data Class)](https://docs.python.org/3/library/dataclasses.html "Data Classes) containing the portfolio with
+The result is a [Value Object(Frozen Data Class)](https://docs.python.org/3/library/dataclasses.html "Data Classes") containing the portfolio with
  the highest sharpe ratio score.
 ```python
 AllocationResults(
     sharpe_ratio=4.020794467140073,
     annual_return=0.10000000000000009,
     risk=0.022383636053900476,
-    weights=array([0.52266234, 0.47733766])
+    weights=[0.52266234, 0.47733766]
 )
 ```
 

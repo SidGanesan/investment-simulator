@@ -1,37 +1,50 @@
-from functools import partial
+from dataclasses import dataclass
+
+import numpy as np
 from typing import Union, Tuple, List, Sequence, Callable
 
-from numpy import ndarray, ones, append, apply_along_axis
-from numpy.ma import exp, std, mean
+from investment_simulator.contributions import continuous_contributions
+from investment_simulator.utils import simulation_parameters
 
-from .contributions import continuous_contributions
-from .utils import stochastic_compounding, simulation_parameters
-from .value_objects.simulation import PortfolioResults
+ArrayLike = Union[Sequence[float], np.ndarray]
+ArrayLike2D = Union[Sequence[ArrayLike], np.ndarray]
+
+
+@dataclass(frozen=True)
+class PortfolioResults:
+    portfolio_return: float
+    portfolio_risk: float
+    simulation_mean: List[float]
+    simulation_std: List[float]
+
 
 __all__ = [
     "growth_simulation",
-    "random_walk",
+    "PortfolioResults",
 ]
 
 
-def get_graph_vectors(result: ndarray) -> Tuple[List[float], List[float]]:
+def get_graph_vectors(result: np.ndarray) -> Tuple[List[float], List[float]]:
     """
     Calculates lists of the mean simulation result and standard deviation
     :param result: Matrix of simulations
     :return: mean outcome and standard deviation of each step in the simulation
     """
-    return mean(result, axis=-1).tolist(), std(result, axis=-1).tolist()
+    mean_ = np.mean(np.array(result), axis=-1)
+    std = np.sqrt(np.mean((result - np.expand_dims(mean_, 1)) ** 2, axis=-1))
+    return mean_.tolist(), std.tolist()
 
 
 def growth_simulation(
-    asset_weightings: Union[Sequence[float], ndarray],
-    annual_returns: Union[Sequence[float], ndarray],
-    covariance: Union[Sequence[Sequence[float]], ndarray],
+    asset_weightings: ArrayLike,
+    annual_returns: ArrayLike,
+    covariance: ArrayLike2D,
     steps: int,
     initial_investment: float = 1,
     fee: float = 0.0,
     simulations: int = 1_000,
-    contribution_function: Callable = continuous_contributions(0.0, 0.0),
+    contribution_function: Callable[[int], float] = continuous_contributions(0.0, 0.0),
+    random_gen: np.random.Generator = np.random,
 ) -> PortfolioResults:
     """
     Calculates a Monte Carlo Simulation of a given Portfolio and asset metrics
@@ -43,8 +56,8 @@ def growth_simulation(
     :param initial_investment: Initial value of the portfolio
     :param fee: percentage based annual fee on holdings. Default 0
     :param simulations: Number of simulations run
-    :param contribution_function: Function that gives additional contributions
-    to the portfolio at regular intervals
+    :param contribution_function: Function that gives additional contributions to the portfolio at regular intervals
+    :param random_gen: The random generator to use. Default np.random
     :return: SimulationResult Object that wraps key statistics of the simulation
     """
     investment_return, investment_risk = simulation_parameters(
@@ -53,70 +66,26 @@ def growth_simulation(
         covariance=covariance,
         fee=fee,
     )
-    partial_random_walk = partial(
-        random_walk,
-        annual_return=investment_return,
-        investment_risk=investment_risk,
-        period=steps,
-        step=1,
-        contribution_function=contribution_function,
+    simulation = np.empty((steps + 1, simulations), dtype=np.float32)
+    simulation[0] = initial_investment
+
+    random_walk = np.exp(
+        random_gen.normal(
+            investment_return - 0.5 * investment_risk ** 2,
+            investment_risk,
+            simulation.shape,
+        )
     )
-    result = apply_along_axis(
-        partial_random_walk, -1, ones((simulations, 1)) * initial_investment
-    )
-    mean, var = get_graph_vectors(result.T)
+    for step in range(1, steps + 1):
+        simulation[step] = simulation[step - 1] * random_walk[step]
+
+    mean_, std = get_graph_vectors(simulation)
+    for step in range(1, steps):
+        mean_[step] += contribution_function(step)
+
     return PortfolioResults(
-        portfolio_return=exp(investment_return) - 1,
+        portfolio_return=np.exp(investment_return) - 1,
         portfolio_risk=investment_risk,
-        simulation_mean=mean,
-        simulation_std=var,
-        x_max=steps,
-        y_max=max(mean) + max(var),
+        simulation_mean=mean_,
+        simulation_std=std,
     )
-
-
-def random_walk(
-    simulation: ndarray,
-    annual_return: float,
-    investment_risk: float,
-    period: int,
-    step: int,
-    contribution_function: Callable = continuous_contributions(0.0, 0.0),
-) -> Union[ndarray, list]:
-    """
-    Recursive implementation of a Gaussian Random Walk to model a portfolio
-    :param simulation: Previous steps in the simulation
-    :param annual_return: Annual return of the portfolio being modeled
-    :param investment_risk: Standard deviation of the portfolio being modeled
-    :param period: current step of the random walk
-    :param step: total steps in the random walk
-    :param contribution_function: Function that gives additional contributions
-    to the portfolio at regular intervals
-    :return: Single simulation of a random walk
-    """
-    if step >= period:
-        return append(
-            simulation,
-            stochastic_compounding(
-                continuous_return=annual_return,
-                investment_risk=investment_risk,
-                investment=simulation[-1],
-            ),
-        )
-    else:
-        return random_walk(
-            simulation=append(
-                simulation,
-                stochastic_compounding(
-                    continuous_return=annual_return,
-                    investment_risk=investment_risk,
-                    investment=simulation[-1],
-                )
-                + contribution_function(step),
-            ),
-            annual_return=annual_return,
-            investment_risk=investment_risk,
-            period=period,
-            step=step + 1,
-            contribution_function=contribution_function,
-        )
