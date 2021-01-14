@@ -3,7 +3,7 @@ from numpy.ma import array
 from investment_simulator import portfolios as ps
 import pytest
 
-from investment_simulator.value_objects.simulation import PortfolioResults
+from investment_simulator.portfolios import PortfolioResults
 
 
 @pytest.fixture
@@ -21,8 +21,6 @@ def test_monte_carlo(simulation_parameters_fixture):
     )
     assert isinstance(result, PortfolioResults)
     assert len(result.simulation_mean) == steps + 1  # add one for initial step
-    assert result.x_max == steps
-    assert result.y_max > 1.0
 
 
 def test_simulation_parameters_l(simulation_parameters_fixture):
