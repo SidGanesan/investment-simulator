@@ -1,14 +1,13 @@
-from numpy.ma import array
+import pytest
+from numpy import log, sqrt
 
 from investment_simulator import portfolios as ps
-import pytest
-
-from investment_simulator.portfolios import PortfolioResults
+from investment_simulator.portfolios import PortfolioResults, InvestmentGoal
 
 
 @pytest.fixture
 def simulation_parameters_fixture():
-    return [0.5, 0.5], [0.1, 0.1], [[1.0, 0.0], [0.0, 1.0]]
+    return [0.5, 0.5], [0.1, 0.1], [[0.001, 0.0], [0.0, 0.001]]
 
 
 def test_monte_carlo(simulation_parameters_fixture):
@@ -29,13 +28,19 @@ def test_simulation_parameters_l(simulation_parameters_fixture):
         simulation_parameters_fixture[1],
         simulation_parameters_fixture[2],
     )
-    assert result == (0.09531017980432493, 0.7071067811865476)
+    assert result == (log(1.1), sqrt(0.0005))
 
 
-def test_simulation_parameters_np(simulation_parameters_fixture):
-    result = ps.simulation_parameters(
-        array(simulation_parameters_fixture[0]),
-        array(simulation_parameters_fixture[1]),
-        array(simulation_parameters_fixture[2]),
+def test_success_probability(simulation_parameters_fixture):
+    steps = 10
+    result = ps.growth_simulation(
+        asset_weightings=simulation_parameters_fixture[0],
+        annual_returns=simulation_parameters_fixture[1],
+        covariance=simulation_parameters_fixture[2],
+        steps=steps,
+        investment_goal=1,
     )
-    assert result == (0.09531017980432493, 0.7071067811865476)
+    assert isinstance(result, InvestmentGoal)
+    assert pytest.approx(result.probability, 0)
+    assert pytest.approx(result.probability, 1)
+    assert pytest.approx(result.additional_savings, 0)
