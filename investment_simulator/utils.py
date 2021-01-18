@@ -72,7 +72,7 @@ def simulation_risk(
     ).item()
 
 
-def annuity(tot_sum, required_return, period):
+def annuity(tot_sum: float, required_return: float, period: int) -> float:
     """
     Calculate the annuity payments for a given sum and period, at the rate of return given.
     :param tot_sum: Present Value of the annuity required

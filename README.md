@@ -36,6 +36,47 @@ PortfolioResults(
 )
 ```
 
+### Investment Goals
+The investment simulator also allows optionally for an investment goal to be input to calculate the likelihood of achieving it. For example; a
+ person my want to save for a certain amount of money for retirement, where the simulation could be used to determine the percentage outcomes that
+  reach the desired amount, as well what additional payments would be required so that the goal is likely to be achieved. Outcomes are assumed
+   to be normally distributed and additional payments are to achieve a probability of 50% of achieving the goal. This is used as follows:
+```python
+from investment_simulator.portfolios import growth_simulation
+
+asset_weights = [0.5, 0.5]
+asset_returns = [0.1, 0.1]
+covariance = [[1.0, 0.0], [0.0, 1.0]]
+steps = 10
+investment_goal = 2.5
+
+growth_simulation(
+        asset_weightings= asset_weights,
+        annual_returns=asset_returns,
+        covariance=covariance,
+        steps=steps,
+        investment_goal=investment_goal,
+    )
+```
+
+The result of which is:
+```python
+InvestmentResults(
+    portfolio_return=0.10000000000000009,
+    portfolio_risk=0.022360679774997897,
+    simulation_mean=[1.0, 1.0995099544525146, 1.210924506187439, 1.3327478170394897, 1.4653383493423462,
+                     1.6140620708465576, 1.7742526531219482, 1.9512927532196045, 2.1460065841674805,
+                     2.357496976852417, 2.5915284156799316],
+    simulation_std=[0.0, 0.024642884731292725, 0.039426639676094055, 0.052822574973106384, 0.06663929671049118,
+                   0.08260171860456467, 0.10066824406385422, 0.11744718253612518, 0.13588516414165497,
+                   0.1578415483236313, 0.18211820721626282],
+    goal=2.5,
+    probability=0.6923691357161944,
+    additional_savings=-0.0)
+```
+Where the person has approximately 70% probability of achieving their investment goal, and doesn't require any additional savings to improve their
+ likelihood above 50%.
+
 ### Contribution Functions
 The simulation has the ability to add annual contributions to the portfolio uniformly across simulations. The contribution function should take the
  time step as an input and return a contribution amount. For example a function could be defined as:
@@ -57,7 +98,9 @@ Where a function`continuous_contributions` is defined as the default contributio
 
 ### Allocations Optimisation
 The library also offers the ability to optimise the allocations of a portfolio, determining the weightings of assets that provide the highest
- return for the lowest risk.
+ return for the lowest risk. This follows the concept of the [Efficient Portfolio Frontier](https://www.investopedia.com/terms/e/efficientfrontier
+ .asp "Efficient Portfolio Frontier") by generating a series of random portfolios to build the curve, then maximising for the portfolio with the
+  highest Sharpe Ratio.
 ```python
 from investment_simulator.allocations import allocations_simulation
 

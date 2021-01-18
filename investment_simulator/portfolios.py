@@ -21,7 +21,7 @@ class PortfolioResults:
 
 
 @dataclass(frozen=True)
-class InvestmentGoal(PortfolioResults):
+class InvestmentResults(PortfolioResults):
     goal: float
     probability: float
     additional_savings: float
@@ -30,7 +30,7 @@ class InvestmentGoal(PortfolioResults):
 __all__ = [
     "growth_simulation",
     "PortfolioResults",
-    "InvestmentGoal",
+    "InvestmentResults",
 ]
 
 
@@ -56,7 +56,7 @@ def growth_simulation(
     contribution_function: Callable[[int], float] = continuous_contributions(0.0, 0.0),
     investment_goal: float = 0,
     random_gen: np.random.Generator = np.random,
-) -> Union[PortfolioResults, Tuple[PortfolioResults, InvestmentGoal]]:
+) -> Union[PortfolioResults, InvestmentResults]:
     """
     Calculates a Monte Carlo Simulation of a given Portfolio and asset metrics.
     to model the potential growth of the portfolio over time.
@@ -123,10 +123,10 @@ def difference_annuity(
     :param period: Duration of investment.
     :return: The positive goal required to meet goal.
     """
-    return min(annuity(goal - result, required_return, period), 0)
+    return max(annuity(goal - result, required_return, period), 0)
 
 
-def success_probabilities(goal: float, sim: PortfolioResults) -> InvestmentGoal:
+def success_probabilities(goal: float, sim: PortfolioResults) -> InvestmentResults:
     """
     Calculate the probability of achieving a goal given investments simulation. This assumes the
     normal distribution of outcomes.
@@ -141,7 +141,7 @@ def success_probabilities(goal: float, sim: PortfolioResults) -> InvestmentGoal:
         goal
     )  # Cumulative probability of achieving goal
 
-    return InvestmentGoal(
+    return InvestmentResults(
         **asdict(sim),
         goal=goal,
         probability=_probability,

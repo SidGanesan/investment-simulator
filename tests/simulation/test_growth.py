@@ -2,7 +2,7 @@ import pytest
 from numpy import log, sqrt
 
 from investment_simulator import portfolios as ps
-from investment_simulator.portfolios import PortfolioResults, InvestmentGoal
+from investment_simulator.portfolios import PortfolioResults, InvestmentResults
 
 
 @pytest.fixture
@@ -38,9 +38,9 @@ def test_success_probability(simulation_parameters_fixture):
         annual_returns=simulation_parameters_fixture[1],
         covariance=simulation_parameters_fixture[2],
         steps=steps,
-        investment_goal=1,
+        investment_goal=2.5,
     )
-    assert isinstance(result, InvestmentGoal)
+    assert isinstance(result, InvestmentResults)
     assert pytest.approx(result.probability, 0)
     assert pytest.approx(result.probability, 1)
     assert pytest.approx(result.additional_savings, 0)
