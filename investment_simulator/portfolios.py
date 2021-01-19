@@ -40,8 +40,12 @@ def get_graph_vectors(result: np.ndarray) -> Tuple[List[float], List[float]]:
     :param result: Matrix of simulations.
     :return: mean outcome and standard deviation of each step in the simulation.
     """
-    mean_ = np.mean(np.array(result), axis=-1)
-    std = np.sqrt(np.mean((result - np.expand_dims(mean_, 1)) ** 2, axis=-1))
+    # noinspection PyUnresolvedReferences
+    mean_ = np.mean(np.array(result), axis=-1)  # numpy types broken
+    # noinspection PyUnresolvedReferences
+    std = np.sqrt(
+        np.mean((result - np.expand_dims(mean_, 1)) ** 2, axis=-1)
+    )  # numpy types broken
     return mean_.tolist(), std.tolist()
 
 

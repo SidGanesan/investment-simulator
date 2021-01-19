@@ -13,7 +13,7 @@ class AllocationResults:
     risk: float
     weights: List[float]
 
-    def __lt__(self, other: 'AllocationResults'):
+    def __lt__(self, other: "AllocationResults"):
         return self.sharpe_ratio < other.sharpe_ratio
 
 

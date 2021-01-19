@@ -13,7 +13,7 @@ def annual_growth(step: int, rate: float) -> float:
 
 def continuous_contributions(
     initial_contribution: float, contribution_growth: float = 0.0
-) -> Callable:
+) -> Callable[[int], float]:
     """
     Creates a function that returns a contribution, compounded by the input growth at each step
     :param initial_contribution: Initial amount to be contributed
@@ -32,7 +32,7 @@ def percentage_income_contributions(
     contribution_rate: float,
     income_growth: float = 0.0,
     tax_function: Callable[[float], float] = (lambda x: 0),
-) -> Callable:
+) -> Callable[[int], float]:
     """
     Creates a function that returns a contribution based on a percentage of input income, compounded
     by the input growth at each step. The contribution is calculated as a percentage of after tax
