@@ -70,3 +70,16 @@ def simulation_risk(
     return np.sqrt(
         np.matmul(np.matmul(weights, covariance), np.expand_dims(weights, 1))
     ).item()
+
+
+def annuity(tot_sum: float, required_return: float, period: int) -> float:
+    """
+    Calculate the annuity payments for a given sum and period, at the rate of return given.
+    :param tot_sum: Present Value of the annuity required
+    :param required_return: Return required for annuity
+    :param period: Duration
+    :return: Annual payments Annuity
+    """
+    v = 1 / (1 + required_return)
+    a_t = (1 - v ** period) / required_return
+    return tot_sum / a_t

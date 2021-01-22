@@ -13,7 +13,7 @@ def annual_growth(step: int, rate: float) -> float:
 
 def continuous_contributions(
     initial_contribution: float, contribution_growth: float = 0.0
-) -> Callable:
+) -> Callable[[int], float]:
     """
     Creates a function that returns a contribution, compounded by the input growth at each step
     :param initial_contribution: Initial amount to be contributed
@@ -32,7 +32,7 @@ def percentage_income_contributions(
     contribution_rate: float,
     income_growth: float = 0.0,
     tax_function: Callable[[float], float] = (lambda x: 0),
-) -> Callable:
+) -> Callable[[int], float]:
     """
     Creates a function that returns a contribution based on a percentage of input income, compounded
     by the input growth at each step. The contribution is calculated as a percentage of after tax
@@ -57,7 +57,7 @@ def kiwi_saver_contributions(
     employer_rate: float,
     income_growth: float,
     gov_contributions: float = 521.43,
-) -> Callable:
+) -> Callable[[int], float]:
     """
     Creates a function that returns a contribution based on a percentage of input income, compounded
     by the input growth at each step. The contribution is calculated as a percentage of before tax following
@@ -67,15 +67,15 @@ def kiwi_saver_contributions(
     :param employer_rate: Percentage of income matched by employer
     :param income_growth: Rate at with income increases each step
     :param gov_contributions: Constant government contribution
-    :return:
+    :return: Function that takes a step and returns the contribution
     """
 
     def inner(step: int) -> float:
-        return (
-            income
-            * (contribution_rate + employer_rate)
-            * annual_growth(step, income_growth)
-            + gov_contributions
+        return income * (contribution_rate + employer_rate) * annual_growth(
+            step, income_growth
+        ) + min(
+            gov_contributions,
+            income * annual_growth(step, income_growth) * contribution_rate * 0.5,
         )
 
     return inner

@@ -13,29 +13,30 @@ class AllocationResults:
     risk: float
     weights: List[float]
 
-    def __lt__(self, other: 'AllocationResults'):
+    def __lt__(self, other: "AllocationResults"):
         return self.sharpe_ratio < other.sharpe_ratio
 
 
-def sharpe_calc(rtrn: float, risk: float) -> float:
+def sharpe_calc(rtrn: float, risk: float, rf: float) -> float:
     """
     Calculate the Sharpe Ratio assumed given continuously compounded return.
     :param rtrn: Continuously compounded return.
     :param risk: Standard deviation of portfolio.
+    :param rf: Risk free rate of return.
     :return: Sharpe Ratio.
     """
-    return (rtrn - 0.01) / risk
+    return (rtrn - rf) / risk
 
 
 def simulate_allocation(
-    annual_returns: ArrayLike,
-    covariance: ArrayLike2D,
+    annual_returns: ArrayLike, covariance: ArrayLike2D, risk_free_rate: float = 0.0025
 ) -> Callable[[ArrayLike], AllocationResults]:
     """
     Function that calculates a series of statistics about a simulated portfolio.
     :param annual_returns: Vector of annual returns of assets being optimized for.
     :param covariance: Covariance matrix of assets being optimized for.
-    :return: Sharpe Ratio, Weightings, Annual Return, Risk
+    :param risk_free_rate: Risk Free Rate of Return. 10yr Govt Bonds Yield .
+    :return: Sharpe Ratio, Weightings, Annual Return, Risk.
     """
 
     def inner(weights: ArrayLike) -> AllocationResults:
@@ -45,7 +46,7 @@ def simulate_allocation(
             covariance=covariance,
         )
         return AllocationResults(
-            sharpe_calc(np.exp(rtrn) - 1, risk),
+            sharpe_calc(np.exp(rtrn) - 1, risk, risk_free_rate),
             np.exp(rtrn) - 1,
             risk,
             weights if not isinstance(weights, np.ndarray) else weights.tolist(),
