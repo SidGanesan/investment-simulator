@@ -10,7 +10,7 @@ Library for simulating a persons investment portfolio over time based on risk an
 ## Usage
 ### Portfolio Simulation
 
-The library offers the ability to simulate how a portfolio will grow over time in a stochastic way, show the variance of possible outcomes based on
+The library offers the ability to simulate how a portfolio will grow over time in a stochastic way, showing the variance of possible outcomes based on
  asset allocations and how the assets are related to each other. The library requires the user to give the average annual return, asset weightings,
   the covariance between the assets, and number of steps in the simulation (investment horizon).
 
@@ -109,8 +109,8 @@ Where a function`continuous_contributions` is defined as the default contributio
 ### Allocations Optimisation
 
 The library also offers the ability to optimise the allocations of a portfolio, determining the weightings of assets that provide the highest
- return for the lowest risk. This follows the concept of the [Efficient Portfolio Frontier](https://www.investopedia.com/terms/e/efficientfrontier
- .asp "Efficient Portfolio Frontier") by generating a series of random portfolios to build the curve, then maximising for the portfolio with the
+ return for the lowest risk. This follows the concept of the [Efficient Portfolio Frontier](https://www.investopedia.com/terms/e/efficientfrontier.asp
+ "Efficient Portfolio Frontier") by generating a series of random portfolios to build the curve, then maximising for the portfolio with the
   highest Sharpe Ratio.
 ```python
 from investment_simulator.allocations import allocations_simulation
