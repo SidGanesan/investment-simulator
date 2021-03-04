@@ -1,9 +1,10 @@
+from dataclasses import asdict
 from pprint import pprint
 
-from investment_lambda import simulation
+from investment_lambda.domain import simulation
 from investment_simulator.portfolios import PortfolioResults
 
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -16,20 +17,11 @@ def handler():
 @app.route("/simulate", methods=["POST"])
 def simulation_handler():
     pprint(request.json)
-    result: PortfolioResults = simulation.handle(request.json)
-    # return jsonify(
-    #     graph=[
-    #         {
-    #             'x': i,
-    #             'y': m,
-    #             'u1': m + s,
-    #             'l1': m - s,
-    #             'std': s,
-    #         } for (i, (m, s)) in enumerate(zip(result.simulation_mean, result.simulation_std))
-    #     ],
-    #     portfolio_return=result.portfolio_return,
-    #     portfolio_risk=result.portfolio_risk,
-    #     y_max=result.y_max,
-    #     x_max=result.x_max,
-    # )
-    return {"status": 200, "body": "simulate"}
+    sim, graphs = simulation.handle(request.json)
+    return {
+        "status": 200,
+        "payload": {
+            "simulationResults": sim,
+            "graphingData": graphs,
+        },
+    }
