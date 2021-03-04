@@ -34,21 +34,6 @@ __all__ = [
 ]
 
 
-def get_graph_vectors(result: np.ndarray) -> Tuple[List[float], List[float]]:
-    """
-    Calculates lists of the mean simulation result and standard deviation.
-    :param result: Matrix of simulations.
-    :return: mean outcome and standard deviation of each step in the simulation.
-    """
-    # noinspection PyUnresolvedReferences
-    mean_ = np.mean(np.array(result), axis=-1)  # numpy types broken
-    # noinspection PyUnresolvedReferences
-    std = np.sqrt(
-        np.mean((result - np.expand_dims(mean_, 1)) ** 2, axis=-1)
-    )  # numpy types broken
-    return mean_.tolist(), std.tolist()
-
-
 def growth_simulation(
     asset_weightings: ArrayLike,
     annual_returns: ArrayLike,
@@ -156,3 +141,18 @@ def success_probabilities(goal: float, sim: PortfolioResults) -> InvestmentResul
             period=len(sim.simulation_mean) - 1,
         ),
     )
+
+
+def get_graph_vectors(result: np.ndarray) -> Tuple[List[float], List[float]]:
+    """
+    Calculates lists of the mean simulation result and standard deviation.
+    :param result: Matrix of simulations.
+    :return: mean outcome and standard deviation of each step in the simulation.
+    """
+    # noinspection PyUnresolvedReferences
+    mean_ = np.mean(np.array(result), axis=-1)  # numpy types broken
+    # noinspection PyUnresolvedReferences
+    std = np.sqrt(
+        np.mean((result - np.expand_dims(mean_, 1)) ** 2, axis=-1)
+    )  # numpy types broken
+    return mean_.tolist(), std.tolist()

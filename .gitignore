@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 .idea/
+
+# node stuff for serverless
+investment_lambda/node_modules
