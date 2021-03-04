@@ -17,8 +17,10 @@ class Portfolio(Model):
             yield name, attr.serialize(getattr(self, name))
 
     portfolio_name = UnicodeAttribute(hash_key=True)
-    risk_score = NumberAttribute(range_key=True)
+    model = UnicodeAttribute(range_key=True)
+    risk_score = NumberAttribute()
     make_up = JSONAttribute(null=False)
+    constants = JSONAttribute()
 
 
 if __name__ == "__main__":

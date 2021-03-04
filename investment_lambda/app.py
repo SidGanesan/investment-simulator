@@ -1,3 +1,5 @@
+from typing import Dict
+
 from investment_lambda.domain import simulation, portfolios
 
 from flask import Flask, request
@@ -22,13 +24,13 @@ def simulation_handler():
     }
 
 
-@app.route("/portfolio", methods=["POST"])
-def get_portfolio_handler():
-    portfolio = portfolios.post_handler(request.json)
+@app.route("/portfolio/<string:model>/<string:name>", methods=["GET"])
+def get_portfolio_handler(name: str, model: str):
+    portfolio = portfolios.get_handler(name, model)
     return {"status": 200, "body": portfolio}
 
 
-@app.route("/portfolio", methods=["PUT"])
-def add_portfolio_handler():
+@app.route("/portfolio/", methods=["PUT"])
+def add_portfolio_handler(model: str, score: int) -> Dict:
     result = portfolios.put_handler(request.json)
     return {"status": 200, "body": result}
