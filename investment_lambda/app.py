@@ -1,10 +1,6 @@
-from dataclasses import asdict
-from pprint import pprint
+from investment_lambda.domain import simulation, portfolios
 
-from investment_lambda.domain import simulation
-from investment_simulator.portfolios import PortfolioResults
-
-from flask import Flask, request, jsonify
+from flask import Flask, request
 
 app = Flask(__name__)
 
@@ -16,7 +12,6 @@ def handler():
 
 @app.route("/simulate", methods=["POST"])
 def simulation_handler():
-    pprint(request.json)
     sim, graphs = simulation.handle(request.json)
     return {
         "status": 200,
@@ -25,3 +20,15 @@ def simulation_handler():
             "graphingData": graphs,
         },
     }
+
+
+@app.route("/portfolio", methods=["POST"])
+def get_portfolio_handler():
+    portfolio = portfolios.post_handler(request.json)
+    return {"status": 200, "body": portfolio}
+
+
+@app.route("/portfolio", methods=["PUT"])
+def add_portfolio_handler():
+    result = portfolios.put_handler(request.json)
+    return {"status": 200, "body": result}
