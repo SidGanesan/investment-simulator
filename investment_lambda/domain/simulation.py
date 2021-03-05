@@ -4,14 +4,14 @@ from investment_simulator import portfolios as p
 
 
 def handle(event):
-    r, w = get_asset_allocations(event["payload"])
+    r, w = get_asset_allocations(event["holdings"])
     result = p.growth_simulation(r, w, covariance_matrix, event["simulation_length"])
     return result, graph_results(result)
 
 
-def get_asset_allocations(payload):
-    returns = list(map(lambda a: asset_returns.get(a["asset_class"]), payload))
-    weightings = list(map(lambda a: a.get("weighting"), payload))
+def get_asset_allocations(holdings):
+    returns = list(map(lambda a: a.get("return"), holdings))
+    weightings = list(map(lambda a: a.get("weighting"), holdings))
     return returns, weightings
 
 
@@ -29,22 +29,10 @@ def graph_results(result: Union[p.PortfolioResults, p.InvestmentResults]):
                 zip(result.simulation_mean, result.simulation_std)
             )
         ],
-        "portfolio_return": result.portfolio_return,
-        "portfolio_risk": result.portfolio_risk,
         "y_max": len(result.simulation_mean) - 1,
         "x_max": max(result.simulation_mean) + max(result.simulation_std),
     }
 
-
-asset_returns = {
-    "cash": 0.037,
-    "nz_debt": 0.051,
-    "nz_equity": 0.085,
-    "aus_equity": 0.089,
-    "global_equity": 0.078,
-    "nz_property": 0.075,
-    "alt_strategies": 0.075,
-}
 
 covariance_matrix = [
     [

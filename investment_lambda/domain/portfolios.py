@@ -4,11 +4,17 @@ from typing import Dict, List
 from investment_lambda.repository.portfolio_repo import (
     add_portfolio_to_repo,
     get_portfolio,
+    get_all_for_model,
 )
 
 
-def get_handler(name: str, model: str) -> Dict:
-    result = get_portfolio(name, model)
+def get_handler(model: str, name: str) -> Dict:
+    result = serialise_portfolio(get_portfolio(model, name))
+    return result
+
+
+def get_all_handler(model: str):
+    result = list(map(serialise_portfolio, get_all_for_model(model)))
     return result
 
 
@@ -21,3 +27,9 @@ def put_handler(request: Dict) -> List[Dict]:
 
 def validate_add_portfolio(request) -> bool:
     return True
+
+
+def serialise_portfolio(portfolio: Dict) -> Dict:
+    portfolio["holdings"] = json.loads(portfolio["holdings"])
+    del portfolio["constants"]
+    return portfolio

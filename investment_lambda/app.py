@@ -17,7 +17,7 @@ def simulation_handler():
     sim, graphs = simulation.handle(request.json)
     return {
         "status": 200,
-        "payload": {
+        "holdings": {
             "simulationResults": sim,
             "graphingData": graphs,
         },
@@ -25,12 +25,27 @@ def simulation_handler():
 
 
 @app.route("/portfolio/<string:model>/<string:name>", methods=["GET"])
-def get_portfolio_handler(name: str, model: str):
-    portfolio = portfolios.get_handler(name, model)
-    return {"status": 200, "body": portfolio}
+def get_portfolio_handler(model: str, name: str):
+    portfolio = portfolios.get_handler(model, name)
+    return {
+        "status": 200,
+        "body": portfolio,
+    }
 
 
-@app.route("/portfolio/", methods=["PUT"])
-def add_portfolio_handler(model: str, score: int) -> Dict:
+@app.route("/portfolio/<string:model>/all", methods=["GET"])
+def get_all_portfolios_handler(model: str):
+    all_portfolios = portfolios.get_all_handler(model)
+    return {
+        "status": 200,
+        "body": all_portfolios,
+    }
+
+
+@app.route("/portfolio/", methods=["POST"])
+def add_portfolio_handler() -> Dict:
     result = portfolios.put_handler(request.json)
-    return {"status": 200, "body": result}
+    return {
+        "status": 200,
+        "body": result,
+    }

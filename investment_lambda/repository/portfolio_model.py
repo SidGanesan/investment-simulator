@@ -1,5 +1,3 @@
-import json
-
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, NumberAttribute, JSONAttribute
 
@@ -13,13 +11,16 @@ class Portfolio(Model):
         read_capacity_units = 10
 
     def __iter__(self):
-        for name, attr in self._get_attributes().items():
+        for name, attr in self.get_attributes().items():
             yield name, attr.serialize(getattr(self, name))
 
-    portfolio_name = UnicodeAttribute(hash_key=True)
-    model = UnicodeAttribute(range_key=True)
+    def as_dict(self):
+        return dict(self)
+
+    model = UnicodeAttribute(hash_key=True)
+    portfolio_name = UnicodeAttribute(range_key=True)
     risk_score = NumberAttribute()
-    make_up = JSONAttribute(null=False)
+    holdings = JSONAttribute(null=False)
     constants = JSONAttribute()
 
 

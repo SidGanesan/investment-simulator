@@ -7,13 +7,13 @@ from investment_lambda.repository.portfolio_model import Portfolio
 def add_portfolio_to_repo(request):
     def inner(portfolio):
         pprint(portfolio)
-        portfolio_name = portfolio.get("name")
         portfolio_model = portfolio.get("model")
+        portfolio_name = portfolio.get("name")
         item = Portfolio(
-            portfolio_name,
             portfolio_model,
+            portfolio_name,
             risk_score=portfolio.get("score"),
-            make_up=portfolio.get("make_up"),
+            holdings=portfolio.get("holdings"),
             constants=request.get("constants"),
         )
         return item.save()
@@ -21,8 +21,11 @@ def add_portfolio_to_repo(request):
     return inner
 
 
-def get_portfolio(name: str, model: str):
-    repo = Portfolio()
-    item = dict(repo.get(name, model))
-    item["make_up"] = json.loads(item["make_up"])
-    return dict(item)
+def get_portfolio(model: str, name: str):
+    item = Portfolio().get(model, name).as_dict()
+    return item
+
+
+def get_all_for_model(model: str):
+    items = map(lambda x: x.as_dict(), Portfolio().query(model))
+    return list(items)
