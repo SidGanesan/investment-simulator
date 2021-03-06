@@ -8,11 +8,8 @@ bucket_name = "model.portfolio.jarden.io"
 
 def get_questions_for_model(s3Client: BaseClient):
     def inner(model: str):
-        result = s3Client.get_object(
-            Bucket=bucket_name, Key="questionnaires/" + model + ".json"
-        )
-        result["Body"] = result["Body"].read()
-        return
+        result = s3Client.get_object(Bucket=bucket_name, Key="questionnaires/" + model)
+        return result["Body"].read()
 
     return inner
 

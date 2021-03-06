@@ -1,5 +1,7 @@
+from pprint import pprint
 from typing import Dict
 
+import jsonpickle as j
 from botocore.client import BaseClient
 
 from investment_lambda.repository.questionnaire_repo import (
@@ -13,13 +15,17 @@ from investment_lambda.types.questionnaire import (
 )
 
 
-def serialise_questions(questions):
-    return questions
+def serialise_questions(questionnaire):
+    return j.decode(questionnaire)
 
 
 def get_questions_handler(s3Client: BaseClient):
     def inner(model: str):
-        return serialise_questions(get_questions_for_model(s3Client)(model))
+        serialised_questionnaire = serialise_questions(
+            get_questions_for_model(s3Client)(model)
+        )
+        pprint(serialised_questionnaire)
+        return serialised_questionnaire
 
     return inner
 
@@ -39,6 +45,7 @@ def validate_question(question: Dict):
 def add_questions(s3Client: BaseClient):
     def inner(questionnaire: Dict):
         valid_questionnaire = validate_questionnaire(questionnaire)
+        pprint(valid_questionnaire)
         return put_questions(s3Client)(valid_questionnaire)
 
     return inner

@@ -1,4 +1,11 @@
 from dataclasses import dataclass
+from typing import List
+
+
+@dataclass
+class PortfolioConstants:
+    model: str
+    covariance_matrix: List[List[float]]
 
 
 @dataclass

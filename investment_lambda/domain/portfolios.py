@@ -1,6 +1,8 @@
 import json
 from typing import Dict, List
 
+from botocore.client import BaseClient
+
 from investment_lambda.repository.portfolio_repo import (
     add_portfolio_to_repo,
     get_portfolio,
@@ -8,28 +10,37 @@ from investment_lambda.repository.portfolio_repo import (
 )
 
 
-def get_handler(model: str, name: str) -> Dict:
-    result = serialise_portfolio(get_portfolio(model, name))
-    return result
+def get_handler(s3Client: BaseClient):
+    def inner(model: str, name: str):
+        result = serialise_portfolio(get_portfolio(s3Client)(model, name))
+        return result
+
+    return inner
 
 
-def get_all_handler(model: str):
-    result = list(map(serialise_portfolio, get_all_for_model(model)))
-    return result
+def get_all_handler(s3Client: BaseClient):
+    def inner(model: str):
+        result = list(map(serialise_portfolio, get_all_for_model(s3Client)(model)))
+        return result
+
+    return inner
 
 
-def put_handler(request: Dict) -> List[Dict]:
-    if not validate_add_portfolio(request):
-        raise Exception("invalid portfolio")
-    result = list(map(add_portfolio_to_repo(request), request["portfolios"]))
-    return result
+def put_handler(s3Client: BaseClient):
+    def inner(request: Dict) -> List[Dict]:
+        result = list(map(add_portfolio_to_repo(request), request["portfolios"]))
+        return result
+
+    return inner
 
 
-def validate_add_portfolio(request) -> bool:
-    return True
+def serialise_portfolio(s3Client: BaseClient):
+    def inner(portfolio: Dict) -> Dict:
+        portfolio["holdings"] = json.loads(portfolio["holdings"])
+        del portfolio["constants"]
+        return portfolio
+
+    return inner
 
 
-def serialise_portfolio(portfolio: Dict) -> Dict:
-    portfolio["holdings"] = json.loads(portfolio["holdings"])
-    del portfolio["constants"]
-    return portfolio
+# def validate_portfolio
