@@ -1,38 +1,42 @@
-from pprint import pprint
-
+import jsonpickle as j
 from botocore.client import BaseClient
 
-from investment_lambda.repository.portfolio_model import Portfolio
+from investment_lambda.types.portfolio import PortfolioConstants, Portfolio
 
-
-def add_portfolio_to_repo(request):
-    def inner(portfolio):
-        pprint(portfolio)
-        portfolio_model = portfolio.get("model")
-        portfolio_name = portfolio.get("name")
-        item = Portfolio(
-            portfolio_model,
-            portfolio_name,
-            risk_score=portfolio.get("score"),
-            holdings=portfolio.get("holdings"),
-            constants=request.get("constants"),
-        )
-        return item.save()
-
-    return inner
+bucket_name = "model.portfolio.jarden.io"
 
 
 def get_portfolio(s3Client: BaseClient):
     def inner(model: str, name: str):
-        item = Portfolio().get(model, name).as_dict()
-        return item
+        pass
 
     return inner
 
 
 def get_all_for_model(s3Client: BaseClient):
     def inner(model: str):
-        items = map(lambda x: x.as_dict(), Portfolio().query(model))
-        return list(items)
+        pass
+
+    return inner
+
+
+def put_portfolio_constants(s3Client: BaseClient):
+    def inner(constants: PortfolioConstants):
+        return s3Client.put_object(
+            Body=j.encode(constants),
+            Bucket=bucket_name,
+            Key="portfolios/" + constants.model,
+        )
+
+    return inner
+
+
+def put_portfolio(s3Client: BaseClient):
+    def inner(portfolio: Portfolio):
+        return s3Client.put_object(
+            Body=j.encode(portfolio),
+            Bucket=bucket_name,
+            Key="portfolios/" + portfolio.model,
+        )
 
     return inner

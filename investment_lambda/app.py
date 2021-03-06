@@ -1,13 +1,10 @@
 from typing import Dict
 
 import boto3
-from flask import Flask, request, jsonify
-from flask import json
+from flask import Flask, request
 from flask_cors import CORS
-from werkzeug.exceptions import HTTPException
 
 from investment_lambda.domain import simulation, portfolios, questionnaire
-from investment_lambda.utils.error import InvalidUsage
 
 app = Flask(__name__)
 CORS(app)
@@ -27,7 +24,7 @@ def simulation_handler():
     sim, graphs = simulation.handle(request.json)
     return {
         "status_code": 200,
-        "holdings": {
+        "body": {
             "simulationResults": sim,
             "graphingData": graphs,
         },
@@ -52,9 +49,9 @@ def get_all_portfolios_handler(model: str):
     }
 
 
-@app.route("/portfolio/", methods=["POST"])
-def add_portfolio_handler() -> Dict:
-    result = portfolios.put_handler(s3Client)(request.json)
+@app.route("/portfolio/<string:model>", methods=["POST"])
+def add_portfolio_handler(model: str) -> Dict:
+    result = portfolios.put_handler(s3Client)(model, request.json)
     return {
         "status_code": 200,
         "body": result,
@@ -79,8 +76,9 @@ def add_questions_handler() -> Dict:
     }
 
 
-@app.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
+@app.errorhandler(Exception)
+def handle_generic_exception(e):
+    return {
+        "status_code": 500,
+        "body": str(e),
+    }

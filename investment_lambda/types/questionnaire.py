@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from typing import List
 
 
-@dataclass()
+@dataclass
 class RiskOption:
     text: str
     score: int
 
 
-@dataclass()
+@dataclass
 class RiskQuestion:
     title: str
     question: str

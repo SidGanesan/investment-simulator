@@ -4,9 +4,15 @@ from typing import Dict, List
 from botocore.client import BaseClient
 
 from investment_lambda.repository.portfolio_repo import (
-    add_portfolio_to_repo,
     get_portfolio,
     get_all_for_model,
+    put_portfolio_constants,
+    put_portfolio,
+)
+from investment_lambda.types.portfolio import (
+    PortfolioConstants,
+    Portfolio,
+    PortfolioHolding,
 )
 
 
@@ -26,10 +32,33 @@ def get_all_handler(s3Client: BaseClient):
     return inner
 
 
+def validate_constants(model: str):
+    def inner(constants: Dict):
+        return PortfolioConstants(model=model, **constants)
+
+    return inner
+
+
+def validate_holdings(holding):
+    return PortfolioHolding(**holding)
+
+
+def validate_portfolios(model: str):
+    def inner(portfolio: Dict):
+        portfolio["holdings"] = list(map(validate_holdings, portfolio["holdings"]))
+        return Portfolio(model=model, **portfolio)
+
+    return inner
+
+
 def put_handler(s3Client: BaseClient):
-    def inner(request: Dict) -> List[Dict]:
-        result = list(map(add_portfolio_to_repo(request), request["portfolios"]))
-        return result
+    def inner(model: str, request: Dict) -> Dict:
+        constants = validate_constants(model)(request["constants"])
+        portfolios = list(map(validate_portfolios(model), request["portfolios"]))
+        return {
+            "constants": put_portfolio_constants(s3Client)(constants),
+            "portfolios": list(map(put_portfolio(s3Client), portfolios)),
+        }
 
     return inner
 
@@ -41,6 +70,3 @@ def serialise_portfolio(s3Client: BaseClient):
         return portfolio
 
     return inner
-
-
-# def validate_portfolio
