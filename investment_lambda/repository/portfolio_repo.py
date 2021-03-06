@@ -1,6 +1,4 @@
-import json
 from pprint import pprint
-
 from investment_lambda.repository.portfolio_model import Portfolio
 
 
