@@ -19,9 +19,9 @@ def handler():
     return {"status_code": 200, "body": "hello world"}
 
 
-@app.route("/simulate", methods=["POST"])
-def simulation_handler():
-    sim, graphs = simulation.handle(request.json)
+@app.route("/simulate/<string:model>", methods=["POST"])
+def simulation_handler(model: str):
+    sim, graphs = simulation.simulation_handler(s3Client)(model, request.json)
     return {
         "status_code": 200,
         "body": {

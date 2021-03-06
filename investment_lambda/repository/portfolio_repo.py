@@ -14,6 +14,13 @@ def get_portfolio(s3Client: BaseClient):
     return inner
 
 
+def get_constants(s3Client: BaseClient):
+    def inner(model: str):
+        return get_from_s3(s3Client)(key="portfolios/" + model + "/constants")
+
+    return inner
+
+
 def get_all_for_model(s3Client: BaseClient):
     def inner(model: str):
         portfolio_keys = list_from_s3(s3Client)("portfolios/" + model + "/")
@@ -28,7 +35,7 @@ def get_all_for_model(s3Client: BaseClient):
 def put_portfolio_constants(s3Client: BaseClient):
     def inner(constants: PortfolioConstants):
         return put_into_s3(s3Client)(
-            j.encode(constants), "portfolios/" + constants.model
+            j.encode(constants), "portfolios/" + constants.model + "/constants"
         )
 
     return inner

@@ -81,7 +81,7 @@ def growth_simulation(
         simulation[step] = simulation[step - 1] * random_walk[step]
 
     mean_, std = get_graph_vectors(simulation)
-    for step in range(1, steps):
+    for step in range(1, steps + 1):
         mean_[step] += contribution_function(step)
 
     result = PortfolioResults(

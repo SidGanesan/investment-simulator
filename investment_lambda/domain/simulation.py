@@ -1,18 +1,39 @@
+from pprint import pprint
 from typing import Union
 
+import numpy as np
+
+from investment_lambda.domain.portfolios import get_covariance_matrix
 from investment_simulator import portfolios as p
+from investment_simulator.contributions import continuous_contributions
 
 
-def handle(event):
-    r, w = get_asset_allocations(event["holdings"])
-    result = p.growth_simulation(r, w, covariance_matrix, event["simulation_length"])
-    return result, graph_results(result)
+def simulation_handler(s3Client):
+    def handle(model, request):
+        r, w, f = get_asset_allocations(request["holdings"])
+        covariance_matrix = get_covariance_matrix(s3Client)(model)
+        pprint(f)
+        result = p.growth_simulation(
+            asset_weightings=w,
+            annual_returns=r,
+            covariance=covariance_matrix,
+            steps=request["simulation_length"],
+            initial_investment=request["portfolio_balance"],
+            fee=f,
+            contribution_function=continuous_contributions(
+                request["contributions"], 0.02
+            ),
+        )
+        return result, graph_results(result)
+
+    return handle
 
 
 def get_asset_allocations(holdings):
-    returns = list(map(lambda a: a.get("return"), holdings))
+    returns = list(map(lambda a: a.get("r"), holdings))
     weightings = list(map(lambda a: a.get("weighting"), holdings))
-    return returns, weightings
+    fees = list(map(lambda a: a.get("fee"), holdings))
+    return returns, weightings, np.dot(weightings, fees)
 
 
 def graph_results(result: Union[p.PortfolioResults, p.InvestmentResults]):
@@ -32,70 +53,3 @@ def graph_results(result: Union[p.PortfolioResults, p.InvestmentResults]):
         "y_max": len(result.simulation_mean) - 1,
         "x_max": max(result.simulation_mean) + max(result.simulation_std),
     }
-
-
-covariance_matrix = [
-    [
-        0.000,
-        0.000,
-        -0.002,
-        0.000,
-        0.000,
-        -0.001,
-        0.001,
-    ],
-    [
-        0.000,
-        0.001,
-        -0.002,
-        -0.002,
-        -0.002,
-        -0.001,
-        0.001,
-    ],
-    [
-        -0.002,
-        -0.002,
-        0.024,
-        0.020,
-        0.016,
-        0.016,
-        -0.001,
-    ],
-    [
-        0.000,
-        -0.002,
-        0.020,
-        0.031,
-        0.019,
-        -0.013,
-        0.002,
-    ],
-    [
-        0.000,
-        -0.002,
-        0.016,
-        0.019,
-        0.021,
-        0.011,
-        0.007,
-    ],
-    [
-        -0.001,
-        -0.001,
-        0.016,
-        0.013,
-        0.011,
-        0.017,
-        -0.001,
-    ],
-    [
-        0.001,
-        0.001,
-        -0.002,
-        0.002,
-        0.007,
-        -0.001,
-        0.010,
-    ],
-]

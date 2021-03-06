@@ -1,6 +1,6 @@
-import jsonpickle as j
-from typing import Dict, List
+from typing import Dict
 
+import jsonpickle as j
 from botocore.client import BaseClient
 
 from investment_lambda.repository.portfolio_repo import (
@@ -8,6 +8,7 @@ from investment_lambda.repository.portfolio_repo import (
     get_all_for_model,
     put_portfolio_constants,
     put_portfolio,
+    get_constants,
 )
 from investment_lambda.types.portfolio import (
     PortfolioConstants,
@@ -63,5 +64,16 @@ def put_handler(s3Client: BaseClient):
     return inner
 
 
-def serialise_portfolio(portfolio: Dict) -> Dict:
+def get_covariance_matrix(s3Client: BaseClient):
+    def inner(model: str):
+        return serialise_constants(get_constants(s3Client)(model)).covariance
+
+    return inner
+
+
+def serialise_portfolio(portfolio: Dict) -> Portfolio:
     return j.decode(portfolio)
+
+
+def serialise_constants(constants: Dict) -> PortfolioConstants:
+    return j.decode(constants)
