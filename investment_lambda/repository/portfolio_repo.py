@@ -1,6 +1,7 @@
 import jsonpickle as j
 from botocore.client import BaseClient
 
+from investment_lambda.infra.s3 import get_from_s3, put_into_s3, list_from_s3
 from investment_lambda.types.portfolio import PortfolioConstants, Portfolio
 
 bucket_name = "model.portfolio.jarden.io"
@@ -8,24 +9,26 @@ bucket_name = "model.portfolio.jarden.io"
 
 def get_portfolio(s3Client: BaseClient):
     def inner(model: str, name: str):
-        pass
+        return get_from_s3(s3Client)(key="portfolios/" + model + "/" + name)
 
     return inner
 
 
 def get_all_for_model(s3Client: BaseClient):
     def inner(model: str):
-        pass
+        portfolio_keys = list_from_s3(s3Client)("portfolios/" + model + "/")
+        portfolios = map(
+            get_from_s3(s3Client), list(map(lambda x: x["Key"], portfolio_keys))
+        )
+        return list(portfolios)
 
     return inner
 
 
 def put_portfolio_constants(s3Client: BaseClient):
     def inner(constants: PortfolioConstants):
-        return s3Client.put_object(
-            Body=j.encode(constants),
-            Bucket=bucket_name,
-            Key="portfolios/" + constants.model,
+        return put_into_s3(s3Client)(
+            j.encode(constants), "portfolios/" + constants.model
         )
 
     return inner
@@ -33,10 +36,8 @@ def put_portfolio_constants(s3Client: BaseClient):
 
 def put_portfolio(s3Client: BaseClient):
     def inner(portfolio: Portfolio):
-        return s3Client.put_object(
-            Body=j.encode(portfolio),
-            Bucket=bucket_name,
-            Key="portfolios/" + portfolio.model,
+        return put_into_s3(s3Client)(
+            j.encode(portfolio), "portfolios/" + portfolio.model + "/" + portfolio.name
         )
 
     return inner

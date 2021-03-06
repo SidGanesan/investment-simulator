@@ -1,6 +1,7 @@
-from botocore.client import BaseClient
 import jsonpickle as j
+from botocore.client import BaseClient
 
+from investment_lambda.infra.s3 import get_from_s3, put_into_s3
 from investment_lambda.types.questionnaire import Questionnaire
 
 bucket_name = "model.portfolio.jarden.io"
@@ -8,18 +9,15 @@ bucket_name = "model.portfolio.jarden.io"
 
 def get_questions_for_model(s3Client: BaseClient):
     def inner(model: str):
-        result = s3Client.get_object(Bucket=bucket_name, Key="questionnaires/" + model)
-        return result["Body"].read()
+        return get_from_s3(s3Client)(key="questionnaires/" + model)
 
     return inner
 
 
 def put_questions(s3Client):
     def inner(questions: Questionnaire):
-        return s3Client.put_object(
-            Body=j.encode(questions),
-            Bucket=bucket_name,
-            Key="questionnaires/" + questions.model,
+        return put_into_s3(s3Client)(
+            j.encode(questions), "questionnaires/" + questions.model
         )
 
     return inner

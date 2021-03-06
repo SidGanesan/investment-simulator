@@ -1,4 +1,4 @@
-import json
+import jsonpickle as j
 from typing import Dict, List
 
 from botocore.client import BaseClient
@@ -63,10 +63,5 @@ def put_handler(s3Client: BaseClient):
     return inner
 
 
-def serialise_portfolio(s3Client: BaseClient):
-    def inner(portfolio: Dict) -> Dict:
-        portfolio["holdings"] = json.loads(portfolio["holdings"])
-        del portfolio["constants"]
-        return portfolio
-
-    return inner
+def serialise_portfolio(portfolio: Dict) -> Dict:
+    return j.decode(portfolio)
