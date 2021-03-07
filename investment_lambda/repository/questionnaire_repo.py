@@ -4,8 +4,6 @@ from botocore.client import BaseClient
 from investment_lambda.infra.s3 import get_from_s3, put_into_s3
 from investment_lambda.types.questionnaire import Questionnaire
 
-bucket_name = "model.portfolio.jarden.io"
-
 
 def get_questions_for_model(s3Client: BaseClient):
     def inner(model: str):

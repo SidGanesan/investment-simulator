@@ -3,10 +3,14 @@ from typing import Dict
 import boto3
 from flask import Flask, request
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 
+from investment_lambda import env
 from investment_lambda.domain import simulation, portfolios, questionnaire
 
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = env.JWT_SECRET_KEY
+jwt = JWTManager(app)
 CORS(app)
 
 s3Client = boto3.client(
@@ -17,6 +21,22 @@ s3Client = boto3.client(
 @app.route("/")
 def handler():
     return {"status_code": 200, "body": "hello world"}
+
+
+@app.route("/auth", methods=["POST"])
+def auth_user():
+    upn = request.headers["UPN"]
+    return (
+        {
+            "status_code": 200,
+            "token": create_access_token(identity=upn),
+        }
+        if "@jarden.co.nz" in upn
+        else {
+            "status_code": 401,
+            "body": "Unauthorised",
+        }
+    )
 
 
 @app.route("/simulate/<string:model>", methods=["POST"])
@@ -50,6 +70,7 @@ def get_all_portfolios_handler(model: str):
 
 
 @app.route("/portfolio/<string:model>", methods=["POST"])
+@jwt_required()
 def add_portfolio_handler(model: str) -> Dict:
     result = portfolios.put_handler(s3Client)(model, request.json)
     return {
@@ -68,6 +89,7 @@ def get_questions_handler(model: str):
 
 
 @app.route("/questionnaire", methods=["POST"])
+@jwt_required()
 def add_questions_handler() -> Dict:
     result = questionnaire.add_questions(s3Client)(request.json)
     return {

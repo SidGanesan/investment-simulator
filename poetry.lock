@@ -163,6 +163,22 @@ Flask = ">=0.9"
 Six = "*"
 
 [[package]]
+category = "main"
+description = "Extended JWT integration with Flask"
+name = "flask-jwt-extended"
+optional = false
+python-versions = ">=3.6,<4"
+version = "4.0.2"
+
+[package.dependencies]
+Flask = ">=1.0,<2.0"
+PyJWT = ">=2.0,<3.0"
+Werkzeug = ">=0.14"
+
+[package.extras]
+asymmetric_crypto = ["cryptography (>=3.0,<4.0)"]
+
+[[package]]
 category = "dev"
 description = "File identification library for Python"
 name = "identify"
@@ -532,7 +548,7 @@ dev = ["pytest", "pytest-timeout", "coverage", "tox", "sphinx", "pallets-sphinx-
 watchdog = ["watchdog"]
 
 [metadata]
-content-hash = "d1a311b4a65647e9560d4ab9401330616b0587b16782949509425cb76d6abd22"
+content-hash = "796673cf50215e26642af2d124577bf28e86c8b86a1696e836967484439d3e5f"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -590,6 +606,10 @@ flask = [
 flask-cors = [
     {file = "Flask-Cors-3.0.10.tar.gz", hash = "sha256:b60839393f3b84a0f3746f6cdca56c1ad7426aa738b70d6c61375857823181de"},
     {file = "Flask_Cors-3.0.10-py2.py3-none-any.whl", hash = "sha256:74efc975af1194fc7891ff5cd85b0f7478be4f7f59fe158102e91abb72bb4438"},
+]
+flask-jwt-extended = [
+    {file = "Flask-JWT-Extended-4.0.2.tar.gz", hash = "sha256:d42015246f61cf7baea474de0657542eb2c3d9b4322cbeac062a418297b265ac"},
+    {file = "Flask_JWT_Extended-4.0.2-py2.py3-none-any.whl", hash = "sha256:e633ca9dcd73aab5d5de5e603e26767cbf0c94be1619bee04ff512ad3ce129d6"},
 ]
 identify = [
     {file = "identify-1.5.12-py2.py3-none-any.whl", hash = "sha256:18994e850ba50c37bcaed4832be8b354d6a06c8fb31f54e0e7ece76d32f69bc8"},
