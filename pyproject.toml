@@ -1,20 +1,21 @@
 [tool.poetry]
-name = "investment_simulator"
-version = "0.2.0"
+name = "investment-simulator"
+version = "0.2.1.1"
 description = "Library for simulating a persons investment portfolio over time based on risk and return"
 authors = ["Siddha Ishmael Ganesan <siddha.ganesan@gmail.com>"]
+keywords = ["investments", "portfolio"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/jarden-sid/investment-simulator"
+repository = "https://github.com/jarden-sid/investment-simulator"
+include = [
+    "LICENSE",
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.20.rc1"
 scipy = "^1.6.0"
-flask = "^1.1.2"
-pynamodb = "^5.0.3"
-flask_cors = "^3.0.10"
-pyjwt = "^2.0.1"
-boto3 = "^1.17.21"
-jsonpickle = "^2.0.0"
-flask-jwt-extended = "^4.0.2"
 pydantic = "^1.8.1"
 
 [tool.poetry.dev-dependencies]

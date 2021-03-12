@@ -7,8 +7,30 @@ Library for simulating a persons investment portfolio over time based on risk an
 
 ---
 
+## Table of Contents
+- [Install](#install)
+- [Usage](#usage)
+  - [Portfolio Simulations](#portfolio simulations)
+  - [Investment Goals](#investment-goals)
+  - [Contribution Functions](#contribution-functions)
+  - [Allocation Optimisation](#allocations-optimisation)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Install
+
+Install from PyPi:
+```
+pip install investment-simulator
+```
+```
+poetry add investment-simulator
+```
+
 ## Usage
-### Portfolio Simulation
+### Portfolio Simulations
 
 The library offers the ability to simulate how a portfolio will grow over time in a stochastic way, showing the variance of possible outcomes based on
  asset allocations and how the assets are related to each other. The library requires the user to give the average annual return, asset weightings,
@@ -135,30 +157,44 @@ AllocationResults(
 
 ---
 
-## Development
+## Maintainers
+
+[@SidGanesan](https://github.com/jarden-sid)
+
+---
+
+## Contributing
+
+Please contribute! [Look at the issues](https://github.com/jarden-sid/investment-simulator/issues).
+
+
+### Development
 Dependencies managed using `poetry` and can be installed using `poetry install`
 
-### Git Hooks
+#### Git Hooks
 This repository uses git hooks for; formatting using black, debug checks, and running tests. This will auto format any commits to a forced styling
  using black, check for debug statements, and block commits where tests fail. Pre Commit can be run using `pre-commit run --all-files` in terminal to
   check your changes before committing if preferred.
 
-### Tests
+#### Tests
 Testing is done in `pytest` and can be initiated using:
 ```shell script
 poetry run python -m pytest -v
 ```
 
----
-
-## Done
+### Done
 * Monte Carlo simulation for an portfolio based on asset weightings and returns.
 * Portfolio Simulation for optimal asset allocations
 * Back solving probabilities of achieving a fixed goal.
 * Git hooks for; formatting using black, debug checks, and running tests.
 * Tax calculation and input to better model income based contribution functions.
 
-## Todo
+### Todo
 * Test Coverage
 * More contribution functions to support usage.
 * Actuarial based formulae and functions for modeling investments.
+---
+
+## License
+
+MIT © 2016
