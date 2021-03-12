@@ -1,4 +1,3 @@
-from pprint import pprint
 from typing import Union
 
 import numpy as np
@@ -12,7 +11,6 @@ def simulation_handler(s3Client):
     def handle(model, request):
         r, w, f = get_asset_allocations(request["holdings"])
         covariance_matrix = get_covariance_matrix(s3Client)(model)
-        pprint(f)
         result = p.growth_simulation(
             asset_weightings=w,
             annual_returns=r,
