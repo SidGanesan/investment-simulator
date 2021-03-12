@@ -10,7 +10,7 @@ Library for simulating a persons investment portfolio over time based on risk an
 ## Table of Contents
 - [Install](#install)
 - [Usage](#usage)
-  - [Portfolio Simulations](#portfolio simulations)
+  - [Portfolio Simulations](#portfolio-simulations)
   - [Investment Goals](#investment-goals)
   - [Contribution Functions](#contribution-functions)
   - [Allocation Optimisation](#allocations-optimisation)
@@ -197,4 +197,4 @@ poetry run python -m pytest -v
 
 ## License
 
-MIT © 2016
+MIT © 2021
